@@ -130,8 +130,6 @@ public:
 	inline unsigned int getUniqueID() const { return m_uid; }
 
 	// Get raw cell data table. Length is CHUNK_SIZE * CHUNK_SIZE. Can be nullptr if it allocation was unsuccessful.
-	// TODO cell-1d remove
-	//inline const char* const* getRawCellData() const { return m_cells; }
 	inline const char* getRawCellData() const { return m_cells; }
 
 	// Get {x,y} chunk-local coords for each alive cell.
@@ -150,18 +148,16 @@ private:
 	void checkInactivity();
 
 	// Internal: Translate local {x,y} cell coordinates to cell index. Does not perform any safety checks.
-	inline static size_t getCellIndex(int x, int y) { return y * CHUNK_SIZE + x; }
+	inline static size_t cellCoords2Index(int x, int y) { return y * CHUNK_SIZE + x; }
 
 	// Internal: Translate cell index to local {x,y} cell coordinates. Does not perform any safety checks.
-	inline static void getCellCoords(size_t idx, int& out_x, int& out_y) {
+	inline static void cellIndex2Coords(size_t idx, int& out_x, int& out_y) {
 		div_t r = std::div(static_cast<int>(idx), static_cast<int>(CHUNK_SIZE));
 		out_y = r.quot;
 		out_x = r.rem;
 	}
 
 	Simulation* m_sim;
-	// TODO cell-1d remove
-	//char** m_cells;
 	char* m_cells;
 	unsigned int m_aliveCells;
 	unsigned int m_births;

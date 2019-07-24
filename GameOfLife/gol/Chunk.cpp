@@ -62,10 +62,6 @@ Chunk::Chunk(Simulation* sim, int col, int row)
 		return;
 
 	// Build cell graph
-	// TODO cell-1d remove
-//	if ((m_cells = new char*[CHUNK_SIZE]) != nullptr)
-//		for (size_t x = 0; x < CHUNK_SIZE; x++)
-//			m_cells[x] = new char[CHUNK_SIZE];
 	if ((m_cells = new char[CHUNK_SIZE * CHUNK_SIZE]) == nullptr)
 	{
 		std::cerr << "chunk could not allocate cell graph! out of memory? ("
@@ -108,9 +104,6 @@ Chunk::~Chunk()
 	// Destroy cell graph
 	if (m_cells != nullptr)
 	{
-		// TODO cell-1d remove
-	//	for (size_t x = 0; x < CHUNK_SIZE; x++)
-	//		delete[] m_cells[x];
 		delete[] m_cells;
 		m_cells = nullptr;
 	}
@@ -122,11 +115,6 @@ void Chunk::clear()
 {
 	if (m_cells == nullptr)
 		return;
-
-	// TODO cell-1d remove
-//	for (size_t x = 0; x < CHUNK_SIZE; x++)
-//		for (size_t y = 0; y < CHUNK_SIZE; y++)
-//			GOL_RESET_CELL(m_cells[x][y]);
 
 	for (size_t i = 0; i < CHUNK_SIZE * CHUNK_SIZE; i++)
 		GOL_RESET_CELL(m_cells[i]);
@@ -152,7 +140,6 @@ void Chunk::updateCellStates()
 		const Ruleset& ruleset = this->getSimulation()->getRuleset();
 		size_t idx = 0;
 
-		// TODO cell-1d x-y reversed
 		for (int y = 0; y < CHUNK_SIZE; y++)
 		{
 			// True if cell borders east/west
@@ -181,24 +168,14 @@ void Chunk::updateCellStates()
 
 					// Cell does not border another chunk...
 					// No need for edge-checking overhead for neighbouring chunks
-				// TODO cell-1d remove
-				//	neighbours = (GOL_IS_CELL_ALIVE(m_cells[x - 1][y - 1]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x - 1][y]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x - 1][y + 1]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x][y - 1]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x][y + 1]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x + 1][y - 1]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x + 1][y]) ? 1 : 0) +
-				//	             (GOL_IS_CELL_ALIVE(m_cells[x + 1][y + 1]) ? 1 : 0);
-					
-					neighbours = (GOL_IS_CELL_ALIVE(m_cells[idx -  1 - CHUNK_SIZE]) ? 1 : 0) + //> [x-1, y-1]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx -  1])              ? 1 : 0) + //> [x-1, y  ]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx -  1 + CHUNK_SIZE]) ? 1 : 0) + //> [x-1, y+1]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx -      CHUNK_SIZE]) ? 1 : 0) + //> [x  , y-1]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx +      CHUNK_SIZE]) ? 1 : 0) + //> [x  , y+1]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1 - CHUNK_SIZE]) ? 1 : 0) + //> [x+1, y-1]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1])              ? 1 : 0) + //> [x+1, y  ]
-					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1 + CHUNK_SIZE]) ? 1 : 0);  //> [x+1, y+1]
+					neighbours = (GOL_IS_CELL_ALIVE(m_cells[idx -  1 - CHUNK_SIZE]) ? 1 : 0) + //> x-1 , y-1
+					             (GOL_IS_CELL_ALIVE(m_cells[idx -  1])              ? 1 : 0) + //> x-1 , y  
+					             (GOL_IS_CELL_ALIVE(m_cells[idx -  1 + CHUNK_SIZE]) ? 1 : 0) + //> x-1 , y+1
+					             (GOL_IS_CELL_ALIVE(m_cells[idx -      CHUNK_SIZE]) ? 1 : 0) + //> x   , y-1
+					             (GOL_IS_CELL_ALIVE(m_cells[idx +      CHUNK_SIZE]) ? 1 : 0) + //> x   , y+1
+					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1 - CHUNK_SIZE]) ? 1 : 0) + //> x+1 , y-1
+					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1])              ? 1 : 0) + //> x+1 , y  
+					             (GOL_IS_CELL_ALIVE(m_cells[idx +  1 + CHUNK_SIZE]) ? 1 : 0);  //> x+1 , y+1
 				}
 
 				if (GOL_IS_CELL_ALIVE(cell))
@@ -227,8 +204,8 @@ void Chunk::updateCellStates()
 						borderChanged = borderChanged || xEdge || yEdge;
 					}
 				}
-			} // for y
-		} // for x
+			} // for x
+		} // for y
 	} // if (m_sleepMode != Sleeping)
 
 	m_borderChanged = borderChanged;
@@ -258,12 +235,9 @@ void Chunk::applyCellStates()
 		{
 			for (int x = 0; x < CHUNK_SIZE; x++, idx++)
 			{
-				// TODO cell-1d remove
-				//char& cell = m_cells[x][y];
 				char& cell = m_cells[idx];
 				bool alive = GOL_IS_CELL_ALIVE_NEXTGEN(cell);
 				GOL_SET_CELL_ALIVE(cell, alive);
-
 				if (alive)
 					m_cellCoords.emplace_back(x, y);
 			}
@@ -372,11 +346,9 @@ void Chunk::setCell(int x, int y, bool alive)
 	if (y < 0 || y >= CHUNK_SIZE)
 		y %= CHUNK_SIZE;
 
-	char& cell = m_cells[getCellIndex(x, y)];
+	char& cell = m_cells[cellCoords2Index(x, y)];
 
 	// Modify active cell counts for this chunk
-	// TODO cell-1d remove
-	//if (GOL_IS_CELL_ALIVE(m_cells[x][y]))
 	if (GOL_IS_CELL_ALIVE(cell))
 	{
 		if (!alive)
@@ -413,9 +385,7 @@ bool Chunk::getCell(int x, int y) const
 	if (y < 0 || y >= CHUNK_SIZE)
 		y %= CHUNK_SIZE;
 	
-	// TODO cell-1d remove
-	//return GOL_IS_CELL_ALIVE(m_cells[x][y]);
-	return GOL_IS_CELL_ALIVE(m_cells[getCellIndex(x, y)]);
+	return GOL_IS_CELL_ALIVE(m_cells[cellCoords2Index(x, y)]);
 }
 
 
@@ -597,12 +567,6 @@ const std::vector<std::pair<int, int>>& Chunk::getCellCoords() const
 	{
 		m_cellCoords.clear();
 		m_cellCoordsInvalid = false;
-		// TODO cell-1d remove
-//		for (int x = 0; x < CHUNK_SIZE; x++)
-//			for (int y = 0; y < CHUNK_SIZE; y++)
-//				if (GOL_IS_CELL_ALIVE(m_cells[x][y]))
-//					m_cellCoords.emplace_back(x, y);
-
 		size_t idx = 0;
 		for (int y = 0; y < CHUNK_SIZE; y++)
 		{
