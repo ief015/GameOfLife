@@ -139,8 +139,7 @@ private:
 	std::condition_variable m_ccSync;
 	enum { CCTask_Update, CCTask_Apply } m_ccTask;
 	// Simple and minimal thread-safe wrapper for std::queue
-	template<class T> class CCSharedQueue
-	{
+	template<class T> class CCSharedQueue {
 	private:
 		mutable std::mutex m_guard;
 		std::queue<T> m_queue;
