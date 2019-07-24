@@ -1,0 +1,145 @@
+#include "Simulation.hpp"
+
+using namespace gol;
+
+#define FLAG_ALIVE 0x1         //> Cell's current alive state
+#define FLAG_ALIVE_NEXTGEN 0x2 //> Cell's alive state after current generation
+
+// Check if cell is alive
+#define IS_CELL_ALIVE(c) ((c & FLAG_ALIVE) != 0)
+
+// Check if cell will be alive next generation
+#define IS_CELL_ALIVE_NEXTGEN(c) ((c & FLAG_ALIVE_NEXTGEN) != 0)
+
+// Set cell's alive state
+#define SET_CELL_ALIVE(c,bAlive) (c = bAlive ? (c | FLAG_ALIVE) : (c & ~FLAG_ALIVE))
+
+// Set cell's alive state for next generation
+#define SET_CELL_ALIVE_NEXTGEN(c,bAlive) (c = bAlive ? (c | FLAG_ALIVE_NEXTGEN) : (c & ~FLAG_ALIVE_NEXTGEN))
+
+#define RULE_UNDERPOPULATION 1 //> Active cell dies if neighbour count is <= this.
+#define RULE_REPRODUCE_MIN 3   //> Dead cell becomes alive if neighbour count between min-max.
+#define RULE_REPRODUCE_MAX 3   //> Dead cell becomes alive if neighbour count between min-max.
+#define RULE_OVERPOPULATION 4  //> Active cell dies if neighbour count is >= this.
+
+
+//////////////////////////////////////////////////////////////////////
+Simulation::Simulation(size_t width, size_t height)
+	: cells(nullptr)
+	, cellsWidth(width)
+	, cellsHeight(height)
+	, generation(0)
+	, aliveCells(0)
+{
+	cells = new char*[width];
+	for (size_t x = 0; x < width; ++x)
+		cells[x] = new char[height];
+
+	this->reset();
+}
+
+
+//////////////////////////////////////////////////////////////////////
+Simulation::~Simulation()
+{
+	for (size_t x = 0; x < cellsWidth; ++x)
+		delete[] cells[x];
+	delete[] cells;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void Simulation::reset()
+{
+	if (cells == nullptr)
+		return;
+
+	for (size_t x = 0; x < cellsWidth; ++x)
+		for (size_t y = 0; y < cellsHeight; ++y)
+			cells[x][y] = 0;
+
+	aliveCells = 0;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void Simulation::step()
+{
+	// Set next generation states.
+	for (size_t x = 0; x < cellsWidth; ++x)
+	{
+		for (size_t y = 0; y < cellsHeight; ++y)
+		{
+			char& cell = cells[x][y];
+
+			int neighbours = getCell(x - 1, y - 1) ? 1 : 0; // NW
+			neighbours    += getCell(x, y - 1)     ? 1 : 0; // N
+			neighbours    += getCell(x + 1, y - 1) ? 1 : 0; // NE
+			neighbours    += getCell(x - 1, y)     ? 1 : 0; // W
+			neighbours    += getCell(x + 1, y)     ? 1 : 0; // E
+			neighbours    += getCell(x - 1, y + 1) ? 1 : 0; // SW
+			neighbours    += getCell(x, y + 1)     ? 1 : 0; // S
+			neighbours    += getCell(x + 1, y + 1) ? 1 : 0; // SE
+
+			if (IS_CELL_ALIVE(cell))
+			{
+				if (neighbours <= RULE_UNDERPOPULATION)
+					SET_CELL_ALIVE_NEXTGEN(cell, false);
+				if (neighbours >= RULE_OVERPOPULATION)
+					SET_CELL_ALIVE_NEXTGEN(cell, false);
+			}
+			else
+			{
+				if (neighbours >= RULE_REPRODUCE_MIN
+					&& neighbours <= RULE_REPRODUCE_MAX)
+					SET_CELL_ALIVE_NEXTGEN(cell, true);
+			}
+
+		}
+	}
+
+	// Update all cells to their next generation states.
+	aliveCells = 0;
+	for (size_t x = 0; x < cellsWidth; ++x)
+	{
+		for (size_t y = 0; y < cellsHeight; ++y)
+		{
+			char& cell = cells[x][y];
+			bool alive = IS_CELL_ALIVE_NEXTGEN(cell);
+			SET_CELL_ALIVE(cell, alive);
+			
+			if (alive)
+				aliveCells++;
+		}
+	}
+
+	generation++;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void Simulation::setCell(size_t x, size_t y, bool alive)
+{
+	if (x >= cellsWidth || y >= cellsHeight)
+		return;
+	if (IS_CELL_ALIVE(cells[x][y]))
+	{
+		if (!alive)
+			aliveCells--;
+	}
+	else
+	{
+		if (alive)
+			aliveCells++;
+	}
+	SET_CELL_ALIVE(cells[x][y], alive);
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool Simulation::getCell(size_t x, size_t y) const
+{
+	if (x >= cellsWidth || y >= cellsHeight)
+		return false;
+	return IS_CELL_ALIVE(cells[x][y]);
+}

@@ -1,0 +1,37 @@
+#pragma once
+
+
+namespace gol
+{
+	
+class Simulation
+{
+public:
+	Simulation(size_t width, size_t height);
+	virtual ~Simulation();
+
+	void reset();
+
+	void step();
+
+	void setCell(size_t x, size_t y, bool alive);
+	bool getCell(size_t x, size_t y) const;
+
+	inline int getGeneration() const { return generation; }
+	inline int getAliveCells() const { return aliveCells; }
+
+	inline size_t getWidth() const { return cellsWidth; }
+	inline size_t getHeight() const { return cellsHeight; }
+
+private:
+	char** cells;
+	size_t cellsWidth, cellsHeight;
+
+	int generation;
+	int aliveCells;
+
+	inline char& getCellRaw(size_t x, size_t y) { return cells[x][y]; }
+	inline const char& getCellRaw(size_t x, size_t y) const { return cells[x][y]; }
+};
+
+}

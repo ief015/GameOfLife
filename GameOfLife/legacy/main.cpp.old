@@ -1,0 +1,181 @@
+#include <SFML/Graphics.hpp>
+#include "Simulation.hpp"
+
+#include <vector>
+#include <sstream>
+#include <iomanip>
+
+unsigned int SCR_W = 1920;
+unsigned int SCR_H = 1080;
+size_t SIM_W = 256;
+size_t SIM_H = 256;
+
+bool paused    = true;
+bool flagExit  = false;
+bool mousedown = false;
+bool debug     = true;
+
+void process_event(const sf::Event& ev, gol::Simulation& sim);
+void update(gol::Simulation& sim);
+void render(const gol::Simulation& sim, sf::VertexArray& graph);
+
+
+//////////////////////////////////////////////////////////////////////
+int main()
+{
+	sf::Clock clk;
+	sf::Event ev;
+	sf::Time updateTimestamp;
+
+	sf::RenderWindow rw;
+	rw.create(sf::VideoMode(SCR_W, SCR_H), "GOL", sf::Style::Close);
+
+	gol::Simulation sim(SIM_W, SIM_H);
+
+	sf::RenderTexture rtGraph;
+	if (!rtGraph.create(sim.getWidth(), sim.getHeight()))
+		return 1;
+
+	sf::Sprite sprGraph;
+	sprGraph.setTexture(rtGraph.getTexture());
+	sprGraph.scale(static_cast<float>(SCR_W) / SIM_W,
+		static_cast<float>(SCR_H) / SIM_H);
+
+	sf::VertexArray graph(sf::Points, 128);
+	graph.clear();
+
+	sf::Font fontDebug; fontDebug.loadFromFile("arial.ttf");
+	sf::Text txtDebug("", fontDebug, 12);
+	sf::Time tsDebugUpdate;
+	sf::Time tsDebugRender;
+
+	clk.restart();
+	while (rw.isOpen())
+	{
+
+		while(rw.pollEvent(ev))
+			process_event(ev, sim);
+
+		if (flagExit)
+		{
+			rw.close();
+			break;
+		}
+
+
+		if (!paused)
+		{
+			if ((clk.getElapsedTime() - updateTimestamp).asSeconds() >= 1.f / 60)
+			{
+				tsDebugUpdate = clk.getElapsedTime();
+				updateTimestamp = clk.getElapsedTime();
+				update(sim);
+				tsDebugUpdate = clk.getElapsedTime() - tsDebugUpdate;
+			}
+		}
+		else
+		{
+			tsDebugUpdate = sf::Time();
+		}
+
+
+		tsDebugRender = clk.getElapsedTime();
+		rw.clear();
+		render(sim, graph);
+		rtGraph.clear();
+		rtGraph.draw(graph);
+		rtGraph.display();
+		rw.draw(sprGraph);
+		if (debug)
+			rw.draw(txtDebug);
+		rw.display();
+		tsDebugRender = clk.getElapsedTime() - tsDebugRender;
+		
+
+		if (debug)
+		{
+			std::stringstream strDebug;
+			strDebug << std::fixed << std::setprecision(2)
+			         << "DEBUG\nupdate : "
+			         << tsDebugUpdate.asSeconds() * 1000.f
+			         << "\nrender : "
+			         << tsDebugRender.asSeconds() * 1000.f;
+			txtDebug.setString(strDebug.str());
+		}
+
+
+		sf::sleep(sf::milliseconds(1));
+
+	}
+
+	return 0;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void process_event(const sf::Event& ev, gol::Simulation& sim)
+{
+	float aspect_w, aspect_h;
+	aspect_w = static_cast<float>(SCR_W) / SIM_W;
+	aspect_h = static_cast<float>(SCR_H) / SIM_H;
+
+	switch (ev.type)
+	{
+	case sf::Event::MouseButtonPressed:
+		if (mousedown = true)
+		{
+			int x = static_cast<int>(ev.mouseButton.x / aspect_w),
+				y = static_cast<int>(ev.mouseButton.y / aspect_h);
+			sim.setCell(x, y, !sim.getCell(x, y));
+		}
+		break;
+
+	case sf::Event::MouseButtonReleased:
+		mousedown = false;
+		break;
+
+	case sf::Event::MouseMoved:
+		if (mousedown)
+		{
+			int x = static_cast<int>(ev.mouseMove.x / aspect_w),
+				y = static_cast<int>(ev.mouseMove.y / aspect_h);
+			sim.setCell(x, y, true);
+		}
+		break;
+
+	case sf::Event::KeyPressed:
+		if (ev.key.code == sf::Keyboard::Space)
+			paused = !paused;
+		if (ev.key.code == sf::Keyboard::R)
+			sim.reset();
+		break;
+
+	case sf::Event::Closed:
+		flagExit = true;
+		break;
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void update(gol::Simulation& sim)
+{
+	sim.step();
+}
+
+//////////////////////////////////////////////////////////////////////
+void render(const gol::Simulation& sim, sf::VertexArray& graph)
+{
+	graph.clear();
+
+	for (size_t x = 0; x < sim.getWidth(); ++x)
+	{
+		for (size_t y = 0; y < sim.getHeight(); ++y)
+		{
+			if (sim.getCell(x, y))
+			{
+				graph.append(sf::Vector2f(static_cast<float>(x), static_cast<float>(y)));
+			}
+		}
+	}
+}
