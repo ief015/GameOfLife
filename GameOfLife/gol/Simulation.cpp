@@ -137,7 +137,7 @@ void Simulation::step()
 		m_births    = m_ccBirths;
 		m_deaths    = m_ccDeaths;
 	}
-	else
+	else // Single-threaded
 	{
 		// Update cell states for next generation
 		int births = 0;
@@ -167,7 +167,7 @@ void Simulation::step()
 		m_cellCount = cellCount;
 	}
 
-	// Check each chunk for deletion (if no active cells for self and neighbour chunks)
+	// Check for chunks to be deleted
 	this->freeInactiveChunks();
 
 	m_generation++;
@@ -195,16 +195,20 @@ void Simulation::ccStartWorker(Simulation* sim)
 		// Process next chunk in queue
 		if (sim->m_ccQueue.pop(chunk))
 		{
-			if (sim->m_ccTask == CCTask_Update)
+			switch (sim->m_ccTask)
 			{
+			case CCTask_Update:
+				// Update cell states for next generation
 				chunk->updateCellStates();
 				sim->m_ccBirths += chunk->getBirths();
 				sim->m_ccDeaths += chunk->getDeaths();
-			}
-			else
-			{
+				break;
+
+			case CCTask_Apply:
+				// Apply new cell states
 				chunk->applyCellStates();
 				sim->m_ccCellCount += chunk->getAliveCells();
+				break;
 			}
 			sim->m_ccCompletions++;
 		}
@@ -254,9 +258,11 @@ void Simulation::setCell(int x, int y, bool alive)
 	x %= Chunk::CHUNK_SIZE;
 	y %= Chunk::CHUNK_SIZE;
 
+	// Remove current chunk population from world population, then
+	// reapply cell count after changing cell
 	m_cellCount -= chunk->getAliveCells();
-
 	chunk->setCell(x, y, alive);
+	m_cellCount += chunk->getAliveCells();
 
 	if (x == 0 || y == 0 || x == Chunk::CHUNK_SIZE - 1 || y == Chunk::CHUNK_SIZE - 1)
 	{
@@ -274,8 +280,6 @@ void Simulation::setCell(int x, int y, bool alive)
 		}
 	}
 
-	// Reapply cell count
-	m_cellCount += chunk->getAliveCells();
 }
 
 
