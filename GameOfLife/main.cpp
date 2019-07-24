@@ -102,7 +102,7 @@ int main()
 	renderer.setSimulation(sim);
 
 	// TODO: add user ability to change ruleset
-	sim.setRuleset(gol::Ruleset("B45678/S2345"));
+	//sim.setRuleset(gol::Ruleset("B45678/S2345"));
 	//sim.setRuleset(gol::Ruleset::GameOfLife);
 	rw.setTitle(std::string("GOL - ") + sim.getRuleset().getString());
 
