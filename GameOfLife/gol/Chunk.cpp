@@ -1,3 +1,33 @@
+// 
+// MIT License
+// 
+// Copyright(c) 2019 Nathan Cousins
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// 
+// 
+// Chunk.cpp
+// Author: Nathan Cousins
+// 
+// Implements class gol::Chunk
+// 
+
 #include "Chunk.hpp"
 #include "Simulation.hpp"
 #include "CellManipulation.hpp"
@@ -85,7 +115,7 @@ void Chunk::clear()
 
 	for (size_t x = 0; x < CHUNK_SIZE; x++)
 		for (size_t y = 0; y < CHUNK_SIZE; y++)
-			RESET_CELL(m_cells[x][y]);
+			GOL_RESET_CELL(m_cells[x][y]);
 
 	m_aliveCells = 0;
 }
@@ -135,23 +165,23 @@ void Chunk::updateCellStates()
 
 					// Cell does not border another chunk...
 					// No need for edge-checking overhead for neighbouring chunks
-					neighbours = (IS_CELL_ALIVE(m_cells[x - 1][y - 1]) ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x - 1][y])     ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x - 1][y + 1]) ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x][y - 1])     ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x][y + 1])     ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x + 1][y - 1]) ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x + 1][y])     ? 1 : 0) +
-								 (IS_CELL_ALIVE(m_cells[x + 1][y + 1]) ? 1 : 0);
+					neighbours = (GOL_IS_CELL_ALIVE(m_cells[x - 1][y - 1]) ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x - 1][y])     ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x - 1][y + 1]) ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x][y - 1])     ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x][y + 1])     ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x + 1][y - 1]) ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x + 1][y])     ? 1 : 0) +
+								 (GOL_IS_CELL_ALIVE(m_cells[x + 1][y + 1]) ? 1 : 0);
 				}
 
-				if (IS_CELL_ALIVE(cell))
+				if (GOL_IS_CELL_ALIVE(cell))
 				{
 					// Cell is alive, check if we stay alive
 					if (!ruleset.testSurvival(neighbours))
 					{
 						// Died
-						SET_CELL_ALIVE_NEXTGEN(cell, false);
+						GOL_SET_CELL_ALIVE_NEXTGEN(cell, false);
 						deaths++;
 
 						// Set borderChanged true if a border cell changed
@@ -164,7 +194,7 @@ void Chunk::updateCellStates()
 					if (ruleset.testBirth(neighbours))
 					{
 						// Born
-						SET_CELL_ALIVE_NEXTGEN(cell, true);
+						GOL_SET_CELL_ALIVE_NEXTGEN(cell, true);
 						births++;
 
 						// Set borderChanged true if a border cell changed
@@ -202,8 +232,8 @@ void Chunk::applyCellStates()
 			for (int y = 0; y < CHUNK_SIZE; y++)
 			{
 				char& cell = m_cells[x][y];
-				bool alive = IS_CELL_ALIVE_NEXTGEN(cell);
-				SET_CELL_ALIVE(cell, alive);
+				bool alive = GOL_IS_CELL_ALIVE_NEXTGEN(cell);
+				GOL_SET_CELL_ALIVE(cell, alive);
 
 				if (alive)
 					m_cellCoords.emplace_back(x, y);
@@ -314,7 +344,7 @@ void Chunk::setCell(int x, int y, bool alive)
 		y %= CHUNK_SIZE;
 
 	// Modify active cell counts for this chunk
-	if (IS_CELL_ALIVE(m_cells[x][y]))
+	if (GOL_IS_CELL_ALIVE(m_cells[x][y]))
 	{
 		if (!alive)
 		{
@@ -334,8 +364,8 @@ void Chunk::setCell(int x, int y, bool alive)
 	}
 
 	// Set cell states
-	SET_CELL_ALIVE(m_cells[x][y], alive);
-	SET_CELL_ALIVE_NEXTGEN(m_cells[x][y], alive);
+	GOL_SET_CELL_ALIVE(m_cells[x][y], alive);
+	GOL_SET_CELL_ALIVE_NEXTGEN(m_cells[x][y], alive);
 }
 
 
@@ -350,7 +380,7 @@ bool Chunk::getCell(int x, int y) const
 	if (y < 0 || y >= CHUNK_SIZE)
 		y %= CHUNK_SIZE;
 
-	return IS_CELL_ALIVE(m_cells[x][y]);
+	return GOL_IS_CELL_ALIVE(m_cells[x][y]);
 }
 
 
@@ -534,7 +564,7 @@ const std::vector<std::pair<int, int>>& Chunk::getCellCoords() const
 		m_cellCoordsInvalid = false;
 		for (int x = 0; x < CHUNK_SIZE; x++)
 			for (int y = 0; y < CHUNK_SIZE; y++)
-				if (IS_CELL_ALIVE(m_cells[x][y]))
+				if (GOL_IS_CELL_ALIVE(m_cells[x][y]))
 					m_cellCoords.emplace_back(x, y);
 	}
 	return m_cellCoords;
