@@ -132,14 +132,19 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="gol\Ruleset.cpp" />
     <ClCompile Include="gol\Simulation.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SimulationRenderer.cpp" />
+    <ClCompile Include="SimulationScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gol\CellManipulation.hpp" />
     <ClInclude Include="gol\Chunk.hpp" />
     <ClInclude Include="gol\Ruleset.hpp" />
     <ClInclude Include="gol\Simulation.hpp" />
+    <ClInclude Include="Scene.hpp" />
+    <ClInclude Include="SceneManager.hpp" />
     <ClInclude Include="SimulationRenderer.hpp" />
+    <ClInclude Include="SimulationScene.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
