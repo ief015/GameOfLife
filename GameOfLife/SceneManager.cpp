@@ -53,7 +53,13 @@ SceneManager::SceneManager()
 //////////////////////////////////////////////////////////////////////
 SceneManager::~SceneManager()
 {
-	
+	if (m_loadScene)
+		delete m_loadScene;
+	for (auto scene : m_scenes)
+	{
+		scene->finish();
+		delete scene;
+	}
 }
 
 
