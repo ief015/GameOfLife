@@ -42,7 +42,7 @@ public:
 	void close() { m_closed = true; }
 
 	// Returns true if this scene has a parent Scene Manager and is not flagged to close.
-	bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
+	inline bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
 
 	// Get the parent Scene Manager.
 	inline SceneManager* getManager() { return m_parent; }
