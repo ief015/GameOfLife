@@ -22,7 +22,7 @@
 // SOFTWARE.
 // 
 // 
-// Simulation.cpp
+// gol/Simulation.cpp
 // Author: Nathan Cousins
 // 
 // Implements class gol::Simulation

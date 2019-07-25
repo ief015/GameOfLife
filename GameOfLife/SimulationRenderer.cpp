@@ -30,6 +30,7 @@
 
 #include "SimulationRenderer.hpp"
 #include "gol/CellManipulation.hpp"
+#include "SceneManager.hpp"
 #include <iostream>
 
 
@@ -43,11 +44,6 @@ SimulationRenderer::SimulationRenderer()
 	, showChunks(false)
 	, showChunkID(false)
 {
-	const std::string fontpath = "ProggyCleanSZ.ttf";
-	if (!m_font.loadFromFile(fontpath))
-	{
-		std::cerr << "could not load font (" << fontpath << ")!" << std::endl;
-	}
 	/*
 	if (!m_shader.loadFromMemory(m_frag, sf::Shader::Fragment))
 	{
@@ -88,7 +84,7 @@ void SimulationRenderer::render() const
 	sf::Text chunkText;
 	if (showChunksCellCount)
 	{
-		chunkText.setFont(m_font);
+		chunkText.setFont(SceneManager::getDefaultFont());
 		chunkText.setCharacterSize(16);
 		chunkText.setOutlineColor(sf::Color(0, 0, 0, 255));
 		chunkText.setOutlineThickness(1.5f);

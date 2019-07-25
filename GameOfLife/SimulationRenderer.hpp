@@ -1,4 +1,5 @@
 #pragma once
+
 // 
 // MIT License
 // 
@@ -29,7 +30,7 @@
 // class SimulationRenderer
 // 
 // A graphical renderer for the data provided by gol::Simulation.
-// Utilizes SFML.
+// Utilizes SFML for graphics handling.
 // 
 
 #include <SFML/Graphics.hpp>
@@ -44,8 +45,6 @@ public:
 	void setRenderTarget(sf::RenderTarget& renderTarget);
 	void setSimulation(const gol::Simulation& simulator);
 
-	inline const sf::Font& getDefaultFont() const { return m_font; }
-
 	void render() const;
 
 	bool showChunks;
@@ -58,7 +57,6 @@ private:
 
 	mutable std::vector<const gol::Chunk*> m_chunkBuffer;
 
-	sf::Font m_font;
 	//sf::Shader m_shader;
 	//static const std::string m_frag;
 };

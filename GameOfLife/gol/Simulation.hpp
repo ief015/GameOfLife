@@ -33,7 +33,7 @@
 // expanding universe. The primary function is to control all simulation
 // chunks; including allocating, freeing, and processing. gol::Simulation
 // also tracks information about the simulation universe, such as population
-// (including deltas), simulation rulesets, chunk count, and generation.
+// (including deltas), simulation rulesets, chunk count, generation, etc.
 // 
 
 #include "Chunk.hpp"

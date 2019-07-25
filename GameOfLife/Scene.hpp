@@ -1,3 +1,5 @@
+#pragma once
+
 // 
 // MIT License
 // 
@@ -22,59 +24,48 @@
 // SOFTWARE.
 // 
 // 
-// main.cpp
+// Scene.hpp
 // Author: Nathan Cousins
+//
+// class Scene
 // 
-// Application entry point and main program loop. Controls the state of the
-// Scene Manager, and ultimately the lifetime of the program.
+// Abstraction interface for implementing various scenes.
 // 
 
-#include "SimulationScene.hpp"
+#include <SFML/Window.hpp>
+#include "SceneManager.hpp"
 
-
-/* TODO main menu?
-GAME OF LIFE
-
-implementation by nathan cousins
-
-
-	  > play (B3/S23)
-		change ruleset
-		exit
-
-up/down arrows: change selection
-enter: make selection
-*/
-
-
-//////////////////////////////////////////////////////////////////////
-int main()
+class Scene
 {
-	sf::Clock clk;
-	sf::Time updateTimestamp;
-	const float updatesPerSecond = 60;
+public:
+	// Notify the Scene Manager to close this scene.
+	void close() { m_closed = true; }
 
-	SceneManager sceneManager;
+	// Returns true if this scene has a parent Scene Manager and is not flagged to close.
+	bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
 
-	sceneManager.load<SimulationScene>();
+	// Get the parent Scene Manager.
+	inline SceneManager* getManager() { return m_parent; }
+	// Get the parent Scene Manager.
+	inline const SceneManager* getManager() const { return m_parent; }
 
-	clk.restart();
-	do
-	{
-		sceneManager.pushAndPopScenes();
-		sceneManager.processEvents();
+protected:
+	friend SceneManager;
+	Scene(SceneManager* m) : m_parent(m), m_closed(false) { }
 
-		if ((clk.getElapsedTime() - updateTimestamp).asSeconds() >= 1.f / updatesPerSecond)
-		{
-			updateTimestamp = clk.getElapsedTime();
-			sceneManager.update();
-		}
+	// Called before the first update().
+	virtual void init() = 0;
+	// Called when this scene is closed and ready to be destroyed.
+	virtual void finish() = 0;
+	// Called when polling user events.
+	virtual void processEvent(const sf::Event& ev) = 0;
+	// Called very often to update scene logic.
+	virtual void update() = 0;
+	// Called once per frame to render the scene.
+	virtual void render() = 0;
 
-		sceneManager.render();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		//sf::sleep(sf::milliseconds(1));
-	} while (!sceneManager.empty());
-
-	return 0;
-}
+private:
+	SceneManager* m_parent;
+	bool m_closed;
+};

@@ -22,7 +22,7 @@
 // SOFTWARE.
 // 
 // 
-// Chunk.cpp
+// gol/Chunk.cpp
 // Author: Nathan Cousins
 // 
 // Implements class gol::Chunk

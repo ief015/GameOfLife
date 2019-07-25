@@ -22,7 +22,7 @@
 // SOFTWARE.
 // 
 // 
-// Ruleset.cpp
+// gol/Ruleset.cpp
 // Author: Nathan Cousins
 // 
 // Implements class gol::Ruleset
