@@ -24,50 +24,48 @@
 // SOFTWARE.
 // 
 // 
-// Scene.hpp
+// UserSettings.hpp
 // Author: Nathan Cousins
 //
-// class Scene
+// class UserSettings
 // 
-// Abstraction interface for implementing various scenes.
+// Provides utilties to load and save persistant data.
 // 
 
-#include <SFML/Window.hpp>
-#include "SceneManager.hpp"
+#include <map>
+#include <string>
 
-class Scene
+class UserSettings final
 {
 public:
-	// Notify the Scene Manager to close this scene.
-	void close() { m_closed = true; }
+	typedef std::string TKey;
+	typedef std::string TValue;
 
-	// Returns true if this scene has a parent Scene Manager and is not flagged to close.
-	inline bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
+	UserSettings();
+	~UserSettings();
 
-	// TODO: change to ref& for consistency?
-	// Get the parent Scene Manager.
-	inline SceneManager* getManager() { return m_parent; }
-	// TODO: change to ref& for consistency?
-	// Get the parent Scene Manager.
-	inline const SceneManager* getManager() const { return m_parent; }
+	bool load(const std::string& path = "settings.cfg");
+	bool save(const std::string& path = "settings.cfg");
 
-protected:
-	friend SceneManager;
-	Scene(SceneManager* m) : m_parent(m), m_closed(false) { }
+	const std::string& getString(const TKey& key) const;
+	const std::string& getString(const TKey& key, const std::string& defaultValue) const;
+	int getInteger(const TKey& key) const;
+	int getInteger(const TKey& key, int defaultValue) const;
+	float getFloat(const TKey& key) const;
+	float getFloat(const TKey& key, float defaultValue) const;
 
-	// Called before the first update().
-	virtual void init() = 0;
-	// Called when this scene is closed and ready to be destroyed.
-	virtual void finish() = 0;
-	// Called when polling user events.
-	virtual void processEvent(const sf::Event& ev) = 0;
-	// Called very often to update scene logic.
-	virtual void update() = 0;
-	// Called once per frame to render the scene.
-	virtual void render() = 0;
-
+	void setString(const TKey& key, const std::string& val);
+	void setInteger(const TKey& key, int val);
+	void setFloat(const TKey& key, float val);
 
 private:
-	SceneManager* m_parent;
-	bool m_closed;
+	// load() will write data from settings tile to this map.
+	std::map<TKey, TValue> m_loadedData;
+
+	// Cached string values.
+	mutable std::map<TKey, std::string> m_strCache;
+	// Cached integer values.
+	mutable std::map<TKey, int> m_intCache;
+	// Cached float values.
+	mutable std::map<TKey, float> m_fltCache;
 };

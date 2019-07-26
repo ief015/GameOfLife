@@ -34,6 +34,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <list>
+#include "UserSettings.hpp"
 
 class Scene;
 class SceneManager final
@@ -61,16 +62,16 @@ public:
 	void closeAll();
 
 	// Push scenes if a scene is ready to be loaded. Invalid/closed scenes will be removed and destroyed.
-	// init() and finish() are called here.
+	// init() and finish() are called on current scene.
 	void pushAndPopScenes();
 	// Poll user events and pass to current scene.
-	// processEvents() is called here.
+	// processEvents() is called on current scene.
 	void processEvents();
 	// Update current scene.
-	// update() is called here.
+	// update() is called on current scene.
 	void update();
 	// Render current scene.
-	// render() is called here.
+	// render() is called on current scene.
 	void render();
 
 	// Get the render window.
@@ -81,10 +82,17 @@ public:
 	// Get the default loaded font.
 	static const sf::Font& getDefaultFont();
 
+	// Get user settings.
+	inline UserSettings& getSettings() { return m_settings; }
+	// Get user settings.
+	inline const UserSettings& getSettings() const { return m_settings; }
+
 private:
 	static sf::Font s_defaultFont;
 	sf::RenderWindow m_rw;
 
 	std::list<Scene*> m_scenes;
 	Scene* m_loadScene;
+
+	UserSettings m_settings;
 };

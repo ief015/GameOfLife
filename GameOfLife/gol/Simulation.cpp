@@ -309,7 +309,7 @@ Chunk* Simulation::createChunk(int col, int row)
 	if (itMapCol == m_chunks.end())
 	{
 		// No column found, make one
-		itMapCol = m_chunks.insert(std::pair<int, RowMap>(col, RowMap())).first;
+		itMapCol = m_chunks.emplace(col, RowMap()).first;
 	}
 
 	auto& mapCol = itMapCol->second;
@@ -320,7 +320,7 @@ Chunk* Simulation::createChunk(int col, int row)
 	{
 		// Create new chunk
 		chunk = new Chunk(this, col, row);
-		itMapRow = mapCol.insert(std::pair<int, Chunk*>(row, chunk)).first;
+		itMapRow = mapCol.emplace(row, chunk).first;
 
 		m_chunkCount++;
 	}
