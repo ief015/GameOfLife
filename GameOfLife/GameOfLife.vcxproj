@@ -134,6 +134,7 @@
     <ClCompile Include="gol\Simulation.cpp" />
     <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="UserSettings.cpp" />
     <ClCompile Include="SimulationRenderer.cpp" />
     <ClCompile Include="SimulationScene.cpp" />
   </ItemGroup>
@@ -145,6 +146,7 @@
     <ClInclude Include="MenuScene.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneManager.hpp" />
+    <ClInclude Include="UserSettings.hpp" />
     <ClInclude Include="SimulationRenderer.hpp" />
     <ClInclude Include="SimulationScene.hpp" />
   </ItemGroup>

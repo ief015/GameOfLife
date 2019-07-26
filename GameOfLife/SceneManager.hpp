@@ -1,20 +1,20 @@
 #pragma once
 
-// 
+//
 // MIT License
-// 
+//
 // Copyright(c) 2019 Nathan Cousins
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,18 +22,19 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-// 
-// 
+//
+//
 // SceneManager.hpp
 // Author: Nathan Cousins
 //
 // class SceneManager
-// 
+//
 // Controls the loading, closing, updating, and otherwise management of Scenes.
-// 
+//
 
 #include <SFML/Graphics.hpp>
 #include <list>
+#include "UserSettings.hpp"
 
 class Scene;
 class SceneManager final
@@ -61,16 +62,16 @@ public:
 	void closeAll();
 
 	// Push scenes if a scene is ready to be loaded. Invalid/closed scenes will be removed and destroyed.
-	// init() and finish() are called here.
+	// init() and finish() are called on current scene.
 	void pushAndPopScenes();
 	// Poll user events and pass to current scene.
-	// processEvents() is called here.
+	// processEvents() is called on current scene.
 	void processEvents();
 	// Update current scene.
-	// update() is called here.
+	// update() is called on current scene.
 	void update();
 	// Render current scene.
-	// render() is called here.
+	// render() is called on current scene.
 	void render();
 
 	// Get the render window.
@@ -88,6 +89,11 @@ public:
 	// Get if automatic close event is enabled. See setAutoWindowClose.
 	inline bool getAutoWindowClose() const { return m_autoWindowClose; }
 
+	// Get user settings.
+	inline UserSettings& getSettings() { return m_settings; }
+	// Get user settings.
+	inline const UserSettings& getSettings() const { return m_settings; }
+
 private:
 	static sf::Font s_defaultFont;
 	sf::RenderWindow m_rw;
@@ -96,4 +102,6 @@ private:
 	Scene* m_loadScene;
 
 	bool m_autoWindowClose;
+
+	UserSettings m_settings;
 };
