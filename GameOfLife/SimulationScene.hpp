@@ -37,38 +37,41 @@
 class SimulationScene : public Scene
 {
 public:
-	SimulationScene(SceneManager* m) : Scene(m) { }
+	SimulationScene(SceneManager* m) : Scene(m, "Simulation") { }
 
 protected:
-	virtual void init() override;
+	virtual void init()   override;
 	virtual void finish() override;
 	virtual void processEvent(const sf::Event & ev) override;
 	virtual void update() override;
 	virtual void render() override;
 
 private:
-	gol::Simulation m_sim;
+	gol::Simulation    m_sim;
 	SimulationRenderer m_renderer;
 	sf::View m_camera;
-	bool m_paused;
-	bool m_stepOnce;
-	int m_debugMode;
+	bool     m_paused;
+	bool     m_stepOnce;
+	int      m_debugMode;
 
-	sf::Text m_txtDebug;
-	sf::Time m_debugUpdateTimestamp;
-	sf::Time m_debugRenderTimestamp;
+	sf::Text m_txtIntro;
+	bool     m_hideIntro;
+
+	sf::Text  m_txtDebug;
+	sf::Time  m_debugUpdateTimestamp;
+	sf::Time  m_debugRenderTimestamp;
 	sf::Clock m_clock;
 
 	struct {
-		bool mouseLeft = false;
+		bool mouseLeft  = false;
 		bool mouseRight = false;
-		bool shift = false;
-		bool moveUp = false;
-		bool moveDown = false;
-		bool moveLeft = false;
-		bool moveRight = false;
-		bool zoomIn = false;
-		bool zoomOut = false;
+		bool shift      = false;
+		bool moveUp     = false;
+		bool moveDown   = false;
+		bool moveLeft   = false;
+		bool moveRight  = false;
+		bool zoomIn     = false;
+		bool zoomOut    = false;
 	} m_controls;
 	
 	bool pre_update();

@@ -132,6 +132,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="gol\Ruleset.cpp" />
     <ClCompile Include="gol\Simulation.cpp" />
+    <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SimulationRenderer.cpp" />
     <ClCompile Include="SimulationScene.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="gol\Chunk.hpp" />
     <ClInclude Include="gol\Ruleset.hpp" />
     <ClInclude Include="gol\Simulation.hpp" />
+    <ClInclude Include="MenuScene.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneManager.hpp" />
     <ClInclude Include="SimulationRenderer.hpp" />

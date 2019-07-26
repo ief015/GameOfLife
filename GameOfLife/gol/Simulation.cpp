@@ -127,8 +127,8 @@ void Simulation::step()
 
 			if (m_ccCompletions != m_chunkCount) // TODO REMOVE BLOCK
 			{
-				std::cerr << "Error during task " << (m_ccTask == CCTask_Update ? "UPDATE" : "APPLY");
-				std::cerr << std::endl << "Chunks processed: ";
+				std::cerr << "error during task " << (m_ccTask == CCTask_Update ? "UPDATE" : "APPLY");
+				std::cerr << std::endl << ". chunks processed: ";
 				std::cerr << m_ccCompletions << " / " << m_chunkCount << std::endl;
 			}
 		}

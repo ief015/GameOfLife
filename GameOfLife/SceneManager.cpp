@@ -40,6 +40,7 @@ sf::Font SceneManager::s_defaultFont = sf::Font();
 
 //////////////////////////////////////////////////////////////////////
 SceneManager::SceneManager()
+	: m_autoWindowClose(true)
 {
 	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
 	videoMode.width  /= 2;
@@ -84,14 +85,6 @@ const sf::Font& SceneManager::getDefaultFont()
 //////////////////////////////////////////////////////////////////////
 void SceneManager::pushAndPopScenes()
 {
-	// Load a pending scene (via load())
-	if (m_loadScene)
-	{
-		m_loadScene->init();
-		m_scenes.push_back(m_loadScene);
-		m_loadScene = nullptr;
-	}
-
 	// Check for invalid/closed scenes and delete them
 	for (auto it = m_scenes.begin(); it != m_scenes.end();)
 	{
@@ -100,12 +93,22 @@ void SceneManager::pushAndPopScenes()
 		{
 			scene->finish();
 			it = m_scenes.erase(it);
+			std::cout << "closed scene: " << scene->getSceneName() << std::endl;
 			delete scene;
 		}
 		else
 		{
 			it++;
 		}
+	}
+
+	// Load a pending scene (via load())
+	if (m_loadScene)
+	{
+		m_loadScene->init();
+		m_scenes.push_back(m_loadScene);
+		std::cout << "loaded scene: " << m_loadScene->getSceneName() << std::endl;
+		m_loadScene = nullptr;
 	}
 }
 
@@ -119,8 +122,25 @@ void SceneManager::processEvents()
 	if (!scene->isValid())
 		return;
 	sf::Event ev;
-	for (int i = 0; i < 32 && m_rw.pollEvent(ev); i++)
-		scene->processEvent(ev);
+	for (int i = 0; i < 64 && m_rw.pollEvent(ev); i++)
+	{
+		if (m_autoWindowClose)
+		{
+			switch (ev.type)
+			{
+			case sf::Event::Closed:
+				this->closeAll();
+				return;
+			default:
+				scene->processEvent(ev);
+				break;
+			}
+		}
+		else
+		{
+			scene->processEvent(ev);
+		}
+	}
 }
 
 
@@ -139,13 +159,13 @@ void SceneManager::update()
 //////////////////////////////////////////////////////////////////////
 void SceneManager::render()
 {
+	if (m_scenes.empty())
+		return;
+	Scene* scene = m_scenes.back();
+	if (!scene->isValid())
+		return;
 	m_rw.clear();
-	if (!m_scenes.empty())
-	{
-		Scene* scene = m_scenes.back();
-		if (scene->isValid())
-			scene->render();
-	}
+	scene->render();
 	m_rw.display();
 }
 

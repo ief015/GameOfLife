@@ -136,6 +136,11 @@ public:
 		return m_ruleString.c_str();
 	}
 
+	// Get this rule-set as a B/S notation c-string.
+	inline operator const char*() const {
+		return this->getString();
+	}
+
 	// Returns true if number of neighbours passes birth rules.
 	inline bool testBirth(size_t neighbours) const {
 		return (neighbours > MAX_NEIGHBOURS) ? false : m_birthSet[neighbours];

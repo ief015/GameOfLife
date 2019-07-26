@@ -44,6 +44,9 @@ public:
 	// Returns true if this scene has a parent Scene Manager and is not flagged to close.
 	inline bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
 
+	// Get the name of the scene.
+	inline const char* getSceneName() const { return m_sceneName; }
+
 	// Get the parent Scene Manager.
 	inline SceneManager* getManager() { return m_parent; }
 	// Get the parent Scene Manager.
@@ -51,7 +54,8 @@ public:
 
 protected:
 	friend SceneManager;
-	Scene(SceneManager* m) : m_parent(m), m_closed(false) { }
+	Scene(SceneManager* m, const char* sceneName = "")
+		: m_parent(m), m_closed(false), m_sceneName(sceneName) { }
 
 	// Called before the first update().
 	virtual void init() = 0;
@@ -67,5 +71,6 @@ protected:
 
 private:
 	SceneManager* m_parent;
+	const char* m_sceneName;
 	bool m_closed;
 };

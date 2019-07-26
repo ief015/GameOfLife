@@ -81,10 +81,19 @@ public:
 	// Get the default loaded font.
 	static const sf::Font& getDefaultFont();
 
+	// If true, window Close event will automatically close all open scenes and exit application.
+	// Enabled by default.
+	inline void setAutoWindowClose(bool enable = true) { m_autoWindowClose = enable; }
+
+	// Get if automatic close event is enabled. See setAutoWindowClose.
+	inline bool getAutoWindowClose() const { return m_autoWindowClose; }
+
 private:
 	static sf::Font s_defaultFont;
 	sf::RenderWindow m_rw;
 
 	std::list<Scene*> m_scenes;
 	Scene* m_loadScene;
+
+	bool m_autoWindowClose;
 };

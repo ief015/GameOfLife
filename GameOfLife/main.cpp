@@ -29,22 +29,7 @@
 // Scene Manager, and ultimately the lifetime of the program.
 // 
 
-#include "SimulationScene.hpp"
-
-
-/* TODO main menu?
-GAME OF LIFE
-
-implementation by nathan cousins
-
-
-	  > play (B3/S23)
-		change ruleset
-		exit
-
-up/down arrows: change selection
-enter: make selection
-*/
+#include "MenuScene.hpp"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -56,7 +41,7 @@ int main()
 
 	SceneManager sceneManager;
 
-	sceneManager.load<SimulationScene>();
+	sceneManager.load<MenuScene>();
 
 	clk.restart();
 	do
@@ -72,8 +57,8 @@ int main()
 
 		sceneManager.render();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		//sf::sleep(sf::milliseconds(1));
+		sf::sleep(sf::milliseconds(1));
+
 	} while (!sceneManager.empty());
 
 	return 0;
