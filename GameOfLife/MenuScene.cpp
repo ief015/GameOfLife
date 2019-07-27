@@ -119,6 +119,7 @@ void MenuScene::invalidate()
 
 	case MainMenu:
 		m_ss << "          GAME OF LIFE" << std::endl;
+		m_ss << "      a cellular automaton" << std::endl;
 		m_ss << std::endl;
 		m_ss << std::endl;
 		m_ss << "implementation by nathan cousins" << std::endl;
@@ -140,12 +141,16 @@ void MenuScene::invalidate()
 		if (m_menuRuleset.userInputValid)
 			m_ss << std::endl;
 		else
-			m_ss << "invalid B/S rulestring" << std::endl;
+			m_ss << "   invalid B/S rulestring" << std::endl;
 		m_ss << std::endl;
 		m_ss << std::endl;
 		m_ss << "      " << (m_menuRuleset.selection == 0 ? "> " : "  ") << "enter ruleset";
 		if (m_menuRuleset.isUserInputting)
-			m_ss << ": " << m_menuRuleset.userInput << "_" << std::endl;
+		{
+			std::string withCaret(m_menuRuleset.userInput);
+			withCaret.insert(m_menuRuleset.caretPos, 1, '_');
+			m_ss << ": " << withCaret << std::endl;
+		}
 		else
 			m_ss << " (" << m_menuRuleset.rules << ")" << std::endl;
 		m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "back" << std::endl;
@@ -171,12 +176,16 @@ bool MenuScene::onText(sf::Uint32 unicode)
 		if (m_menuRuleset.isUserInputting)
 		{
 			std::string str = sf::String(unicode).toAnsiString();
-			char c = str[0];
-			if (isdigit(c) || c == '/' || c == 'b' || c == 's')
+			if (!str.empty())
 			{
-				m_menuRuleset.userInput.append(str);
-				m_menuRuleset.checkValid();
-				return true;
+				char c = str[0];
+				if (isdigit(c) || c == '/' || c == 'b' || c == 's')
+				{
+					m_menuRuleset.userInput.insert(m_menuRuleset.caretPos, 1, c);
+					m_menuRuleset.checkValid();
+					m_menuRuleset.caretPos++;
+					return true;
+				}
 			}
 		}
 		break;
@@ -242,6 +251,11 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 					if (m_menuRuleset.userInputValid)
 						m_menuRuleset.rules.set(m_menuRuleset.userInput);
 					m_menuRuleset.userInput = m_menuRuleset.rules;
+					m_menuRuleset.userInputValid = true;
+				}
+				else
+				{
+					m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
 				}
 				m_menuRuleset.isUserInputting = !m_menuRuleset.isUserInputting;
 				return true;
@@ -270,12 +284,35 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 		}
 		else if (key == sf::Keyboard::Backspace && m_menuRuleset.isUserInputting)
 		{
-			if (!m_menuRuleset.userInput.empty())
+			if (!m_menuRuleset.userInput.empty() && m_menuRuleset.caretPos > 0)
 			{
-				m_menuRuleset.userInput.erase(m_menuRuleset.userInput.end() - 1);
+				m_menuRuleset.userInput.erase(m_menuRuleset.userInput.begin() + m_menuRuleset.caretPos - 1);
 				m_menuRuleset.checkValid();
+				m_menuRuleset.caretPos--;
 				return true;
 			}
+		}
+		else if (key == sf::Keyboard::Left && m_menuRuleset.isUserInputting)
+		{
+			if (m_menuRuleset.caretPos > 0)
+				m_menuRuleset.caretPos--;
+			return true;
+		}
+		else if (key == sf::Keyboard::Right && m_menuRuleset.isUserInputting)
+		{
+			if (m_menuRuleset.caretPos < m_menuRuleset.userInput.size())
+				m_menuRuleset.caretPos++;
+			return true;
+		}
+		else if (key == sf::Keyboard::Home && m_menuRuleset.isUserInputting)
+		{
+			m_menuRuleset.caretPos = 0;
+			return true;
+		}
+		else if (key == sf::Keyboard::End && m_menuRuleset.isUserInputting)
+		{
+			m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
+			return true;
 		}
 		break;
 	}

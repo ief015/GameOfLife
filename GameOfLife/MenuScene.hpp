@@ -81,6 +81,7 @@ private:
 		std::string userInput;
 		bool isUserInputting = false;
 		bool userInputValid = true;
+		size_t caretPos;
 		void checkValid() {
 			gol::Ruleset rules;
 			userInputValid = rules.set(userInput);
