@@ -33,6 +33,7 @@
 // 
 
 #include "Scene.hpp"
+#include "gol/Ruleset.hpp"
 #include <sstream>
 
 
@@ -73,4 +74,16 @@ private:
 	struct {
 		int selection = 0;
 	} m_menuMain;
+
+	struct {
+		int selection = 0;
+		gol::Ruleset rules;
+		std::string userInput;
+		bool isUserInputting = false;
+		bool userInputValid = true;
+		void checkValid() {
+			gol::Ruleset rules;
+			userInputValid = rules.set(userInput);
+		}
+	} m_menuRuleset;
 };

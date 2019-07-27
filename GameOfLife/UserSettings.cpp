@@ -72,7 +72,7 @@ bool UserSettings::save(const std::string& path)
 
 
 //////////////////////////////////////////////////////////////////////
-const std::string& UserSettings::getString(const TKey& k) const
+std::string UserSettings::getString(const TKey& k) const
 {
 	auto it = m_strCache.find(k);
 	if (it == m_strCache.end())
@@ -91,7 +91,7 @@ const std::string& UserSettings::getString(const TKey& k) const
 
 
 //////////////////////////////////////////////////////////////////////
-const std::string& UserSettings::getString(const TKey& k, const std::string& defaultValue) const
+std::string UserSettings::getString(const TKey& k, const std::string& defaultValue) const
 {
 	auto it = m_strCache.find(k);
 	if (it == m_strCache.end())
@@ -200,4 +200,19 @@ void UserSettings::setInteger(const TKey& key, int val)
 void UserSettings::setFloat(const TKey& key, float val)
 {
 	m_fltCache[key] = val;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool UserSettings::hasKey(const TKey& key) const
+{
+	if (m_loadedData.find(key) != m_loadedData.end())
+		return true;
+	if (m_strCache.find(key) != m_strCache.end())
+		return true;
+	if (m_intCache.find(key) != m_intCache.end())
+		return true;
+	if (m_fltCache.find(key) != m_fltCache.end())
+		return true;
+	return false;
 }

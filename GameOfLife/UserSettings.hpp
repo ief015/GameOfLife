@@ -47,8 +47,8 @@ public:
 	bool load(const std::string& path = "settings.cfg");
 	bool save(const std::string& path = "settings.cfg");
 
-	const std::string& getString(const TKey& key) const;
-	const std::string& getString(const TKey& key, const std::string& defaultValue) const;
+	std::string getString(const TKey& key) const;
+	std::string getString(const TKey& key, const std::string& defaultValue) const;
 	int getInteger(const TKey& key) const;
 	int getInteger(const TKey& key, int defaultValue) const;
 	float getFloat(const TKey& key) const;
@@ -57,6 +57,9 @@ public:
 	void setString(const TKey& key, const std::string& val);
 	void setInteger(const TKey& key, int val);
 	void setFloat(const TKey& key, float val);
+
+	// Returns true if key exists.
+	bool hasKey(const TKey& key) const;
 
 private:
 	// load() will write data from settings tile to this map.

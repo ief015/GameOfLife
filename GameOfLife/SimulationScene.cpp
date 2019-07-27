@@ -39,22 +39,21 @@
 void SimulationScene::init()
 {
 	auto& rw = this->getManager().getWindow();
+	auto& settings = this->getManager().getSettings();
+	m_renderer.setRenderTarget(rw);
+	m_renderer.setSimulation(m_sim);
 
 	m_paused    = true;
 	m_stepOnce  = false;
 	m_hideIntro = false;
 	m_debugMode = 0;
-	m_camera = rw.getDefaultView();
+	m_camera    = rw.getView();
 
-	m_renderer.setRenderTarget(rw);
-	m_renderer.setSimulation(m_sim);
-
-	// TODO: add user ability to change ruleset
-	m_sim.setRuleset(gol::Ruleset("B3/S5"));
-	//m_sim.setRuleset(gol::Ruleset::Flock);
+	gol::Ruleset rules;
+	if (rules.set(settings.getString("ruleset")))
+		m_sim.setRuleset(rules);
 
 	rw.setTitle(std::string("GOL - ") + m_sim.getRuleset().getString());
-
 
 	std::stringstream ss;
 	ss << "                       WELCOME TO GAME OF LIFE" << std::endl;
@@ -94,11 +93,6 @@ void SimulationScene::finish()
 {
 	auto& rw = this->getManager().getWindow();
 	rw.setTitle("GOL");
-
-	sf::View v = rw.getDefaultView();
-	v.setSize(static_cast<float>(rw.getSize().x), static_cast<float>(rw.getSize().y));
-	rw.setView(v);
-
 	m_sim.reset();
 }
 
@@ -286,8 +280,7 @@ void SimulationScene::render()
 	m_renderer.render();
 
 	sf::Vector2u screen = rw.getSize();
-	sf::FloatRect visibleArea(0, 0, static_cast<float>(screen.x), static_cast<float>(screen.y));
-	rw.setView(sf::View(visibleArea));
+	rw.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(screen.x), static_cast<float>(screen.y))));
 
 	if (!m_hideIntro)
 	{
@@ -303,7 +296,7 @@ void SimulationScene::render()
 	if (m_debugMode != 0)
 	{
 		std::stringstream strDebug;
-		strDebug << std::fixed << std::setprecision(2) << "DEBUG";
+		strDebug << std::fixed << std::setprecision(2) << "DEBUG (" << m_debugMode << ")";
 		if (m_sim.isMultithreaded())
 			strDebug << "\nMULTITHREADED (" << m_sim.getWorkerThreadCount() << ")";
 		if (m_paused)

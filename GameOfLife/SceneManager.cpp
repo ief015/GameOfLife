@@ -41,6 +41,7 @@ sf::Font SceneManager::s_defaultFont = sf::Font();
 //////////////////////////////////////////////////////////////////////
 SceneManager::SceneManager()
 	: m_autoWindowClose(true)
+	, m_minWindowSize(500, 400)
 {
 	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
 	videoMode.width  /= 2;
@@ -137,7 +138,26 @@ void SceneManager::processEvents()
 			{
 			case sf::Event::Closed:
 				this->closeAll();
+				scene->processEvent(ev);
 				return;
+			case sf::Event::Resized:
+			{
+				bool bMinThresh = false;
+				unsigned int nw = ev.size.width, nh = ev.size.height;
+				if ((nw < m_minWindowSize.x) && (bMinThresh = true))
+					nw = m_minWindowSize.x;
+				if ((nh < m_minWindowSize.y) && (bMinThresh = true))
+					nh = m_minWindowSize.y;
+				if (!bMinThresh)
+				{
+					m_rw.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(nw), static_cast<float>(nh))));
+					scene->processEvent(ev);
+				}
+				else
+				{
+					m_rw.setSize(sf::Vector2u(nw, nh));
+				}
+			} break;
 			default:
 				scene->processEvent(ev);
 				break;

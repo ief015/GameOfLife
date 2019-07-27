@@ -108,6 +108,6 @@ private:
 	Scene* m_loadScene;
 
 	bool m_autoWindowClose;
-
+	sf::Vector2u m_minWindowSize;
 
 };

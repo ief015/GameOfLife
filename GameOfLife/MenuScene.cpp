@@ -39,10 +39,17 @@
 void MenuScene::init()
 {
 	auto& rw = this->getManager().getWindow();
+	auto& settings = this->getManager().getSettings();
 
 	m_txt = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txt.setFillColor(sf::Color::White);
 
+	// Default is B3/S23 (Conway's Game of Life)
+	m_menuRuleset.rules.set(gol::Ruleset::GameOfLife);
+	if (!settings.hasKey("ruleset") || !m_menuRuleset.rules.set(settings.getString("ruleset")))
+		settings.setString("ruleset", m_menuRuleset.rules.getString());
+	m_menuRuleset.userInput = m_menuRuleset.rules;
+	
 	m_currentMenu = MainMenu;
 	this->invalidate();
 }
@@ -51,7 +58,8 @@ void MenuScene::init()
 //////////////////////////////////////////////////////////////////////
 void MenuScene::finish()
 {
-
+	auto& settings = this->getManager().getSettings();
+	settings.setString("ruleset", m_menuRuleset.rules.getString());
 }
 
 
@@ -73,11 +81,8 @@ void MenuScene::processEvent(const sf::Event & ev)
 		break;
 
 	case sf::Event::Resized:
-	{
-		sf::FloatRect visibleArea(0, 0, static_cast<float>(ev.size.width), static_cast<float>(ev.size.height));
-		rw.setView(sf::View(visibleArea));
 		bInvalidate = true;
-	} break;
+		break;
 
 	}
 
@@ -113,13 +118,13 @@ void MenuScene::invalidate()
 	{
 
 	case MainMenu:
-		m_ss << "          GAME OF LIFE          " << std::endl;
+		m_ss << "          GAME OF LIFE" << std::endl;
 		m_ss << std::endl;
 		m_ss << std::endl;
 		m_ss << "implementation by nathan cousins" << std::endl;
 		m_ss << std::endl;
 		m_ss << std::endl;
-		m_ss << "      " << (m_menuMain.selection == 0 ? "> " : "  ") << "start (" << gol::Ruleset() << ")" << std::endl;
+		m_ss << "      " << (m_menuMain.selection == 0 ? "> " : "  ") << "start (" << m_menuRuleset.rules << ")" << std::endl;
 		m_ss << "      " << (m_menuMain.selection == 1 ? "> " : "  ") << "change ruleset" << std::endl;
 		m_ss << "      " << (m_menuMain.selection == 2 ? "> " : "  ") << "exit" << std::endl;
 		m_ss << std::endl;
@@ -129,7 +134,22 @@ void MenuScene::invalidate()
 		break;
 
 	case ChangeRuleset:
-		m_ss << "> back <" << std::endl;
+		m_ss << "          RULESET" << std::endl;
+		m_ss << std::endl;
+		m_ss << std::endl;
+		if (m_menuRuleset.userInputValid)
+			m_ss << std::endl;
+		else
+			m_ss << "invalid B/S rulestring" << std::endl;
+		m_ss << std::endl;
+		m_ss << std::endl;
+		m_ss << "      " << (m_menuRuleset.selection == 0 ? "> " : "  ") << "enter ruleset";
+		if (m_menuRuleset.isUserInputting)
+			m_ss << ": " << m_menuRuleset.userInput << "_" << std::endl;
+		else
+			m_ss << " (" << m_menuRuleset.rules << ")" << std::endl;
+		m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "back" << std::endl;
+		
 		break;
 	}
 
@@ -148,6 +168,17 @@ bool MenuScene::onText(sf::Uint32 unicode)
 		break;
 
 	case ChangeRuleset:
+		if (m_menuRuleset.isUserInputting)
+		{
+			std::string str = sf::String(unicode).toAnsiString();
+			char c = str[0];
+			if (isdigit(c) || c == '/' || c == 'b' || c == 's')
+			{
+				m_menuRuleset.userInput.append(str);
+				m_menuRuleset.checkValid();
+				return true;
+			}
+		}
 		break;
 	}
 
@@ -165,18 +196,18 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 	case MainMenu:
 		if (key == sf::Keyboard::Return)
 		{
-			if (m_menuMain.selection == 0)
+			if (m_menuMain.selection == 0) //> start
 			{
 				this->getManager().load<SimulationScene>();
 				this->close();
 				return false;
 			}
-			else if (m_menuMain.selection == 1)
+			else if (m_menuMain.selection == 1) //> change ruleset
 			{
 				m_currentMenu = ChangeRuleset;
 				return true;
 			}
-			else if (m_menuMain.selection == 2)
+			else if (m_menuMain.selection == 2) //> exit
 			{
 				this->getManager().closeAll();
 				return false;
@@ -204,8 +235,47 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 	case ChangeRuleset:
 		if (key == sf::Keyboard::Return)
 		{
-			m_currentMenu = MainMenu;
-			return true;
+			if (m_menuRuleset.selection == 0) // enter ruleset
+			{
+				if (m_menuRuleset.isUserInputting)
+				{
+					if (m_menuRuleset.userInputValid)
+						m_menuRuleset.rules.set(m_menuRuleset.userInput);
+					m_menuRuleset.userInput = m_menuRuleset.rules;
+				}
+				m_menuRuleset.isUserInputting = !m_menuRuleset.isUserInputting;
+				return true;
+			}
+			else if (m_menuRuleset.selection == 1) // back
+			{
+				m_currentMenu = MainMenu;
+				return true;
+			}
+		}
+		else if (key == sf::Keyboard::Down && !m_menuRuleset.isUserInputting)
+		{
+			if (m_menuRuleset.selection < 2)
+			{
+				m_menuRuleset.selection++;
+				return true;
+			}
+		}
+		else if (key == sf::Keyboard::Up && !m_menuRuleset.isUserInputting)
+		{
+			if (m_menuRuleset.selection > 0)
+			{
+				m_menuRuleset.selection--;
+				return true;
+			}
+		}
+		else if (key == sf::Keyboard::Backspace && m_menuRuleset.isUserInputting)
+		{
+			if (!m_menuRuleset.userInput.empty())
+			{
+				m_menuRuleset.userInput.erase(m_menuRuleset.userInput.end() - 1);
+				m_menuRuleset.checkValid();
+				return true;
+			}
 		}
 		break;
 	}
