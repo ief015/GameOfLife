@@ -39,7 +39,7 @@
 class MenuScene : public Scene
 {
 public:
-	MenuScene(SceneManager* m) : Scene(m, "Menu") { }
+	MenuScene(SceneManager& m) : Scene(m, "Menu") { }
 
 	// Invalidate on-screen text.
 	void invalidate();

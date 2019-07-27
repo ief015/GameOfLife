@@ -38,7 +38,7 @@
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::init()
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 
 	m_paused    = true;
 	m_stepOnce  = false;
@@ -92,11 +92,11 @@ void SimulationScene::init()
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::finish()
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 	rw.setTitle("GOL");
 
 	sf::View v = rw.getDefaultView();
-	v.setSize(rw.getSize().x, rw.getSize().y);
+	v.setSize(static_cast<float>(rw.getSize().x), static_cast<float>(rw.getSize().y));
 	rw.setView(v);
 
 	m_sim.reset();
@@ -160,7 +160,7 @@ void SimulationScene::processEvent(const sf::Event & ev)
 			m_paused = !m_paused;
 			break;
 		case sf::Keyboard::Escape:
-			this->getManager()->load<MenuScene>();
+			this->getManager().load<MenuScene>();
 			this->close();
 			break;
 		case sf::Keyboard::R:
@@ -270,17 +270,17 @@ void SimulationScene::update()
 {
 	if (!pre_update())
 		return;
-	m_debugUpdateTimestamp = m_clock.getElapsedTime();
+	m_debugUpdateTimestamp = this->getManager().getElapsedTime();
 	m_sim.step();
-	m_debugUpdateTimestamp = m_clock.getElapsedTime() - m_debugUpdateTimestamp;
+	m_debugUpdateTimestamp = this->getManager().getElapsedTime() - m_debugUpdateTimestamp;
 }
 
 
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::render()
 {
-	m_debugRenderTimestamp = m_clock.getElapsedTime();
-	auto& rw = this->getManager()->getWindow();
+	m_debugRenderTimestamp = this->getManager().getElapsedTime();
+	auto& rw = this->getManager().getWindow();
 
 	rw.setView(m_camera);
 	m_renderer.render();
@@ -298,7 +298,7 @@ void SimulationScene::render()
 	if (m_debugMode != 0)
 		rw.draw(m_txtDebug);
 
-	m_debugRenderTimestamp = m_clock.getElapsedTime() - m_debugRenderTimestamp;
+	m_debugRenderTimestamp = this->getManager().getElapsedTime() - m_debugRenderTimestamp;
 
 	if (m_debugMode != 0)
 	{
@@ -376,7 +376,7 @@ void SimulationScene::placeCells(int x, int y, int size, bool alive)
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y)
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 	sf::Vector2f v = rw.mapPixelToCoords(sf::Vector2i(scr_x, scr_y), m_camera);
 	out_x = static_cast<int>(v.x);
 	out_y = static_cast<int>(v.y);

@@ -38,7 +38,7 @@
 //////////////////////////////////////////////////////////////////////
 void MenuScene::init()
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 
 	m_txt = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txt.setFillColor(sf::Color::White);
@@ -58,7 +58,7 @@ void MenuScene::finish()
 //////////////////////////////////////////////////////////////////////
 void MenuScene::processEvent(const sf::Event & ev)
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 	bool bInvalidate = false;
 
 	switch (ev.type)
@@ -96,7 +96,7 @@ void MenuScene::update()
 //////////////////////////////////////////////////////////////////////
 void MenuScene::render()
 {
-	auto& rw = this->getManager()->getWindow();
+	auto& rw = this->getManager().getWindow();
 	auto screen = rw.getSize();
 	m_txt.setPosition(static_cast<float>(screen.x / 2), static_cast<float>(screen.y / 2));
 	rw.draw(m_txt);
@@ -161,13 +161,13 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 	switch (m_currentMenu)
 	{
 
-//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
 	case MainMenu:
 		if (key == sf::Keyboard::Return)
 		{
 			if (m_menuMain.selection == 0)
 			{
-				this->getManager()->load<SimulationScene>();
+				this->getManager().load<SimulationScene>();
 				this->close();
 				return false;
 			}
@@ -178,7 +178,7 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 			}
 			else if (m_menuMain.selection == 2)
 			{
-				this->getManager()->closeAll();
+				this->getManager().closeAll();
 				return false;
 			}
 		}
@@ -200,7 +200,7 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 		}
 		break;
 
-//////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
 	case ChangeRuleset:
 		if (key == sf::Keyboard::Return)
 		{

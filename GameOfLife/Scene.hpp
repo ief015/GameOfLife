@@ -42,21 +42,24 @@ public:
 	void close() { m_closed = true; }
 
 	// Returns true if this scene has a parent Scene Manager and is not flagged to close.
-	inline bool isValid() const { return (m_parent != nullptr) && (!m_closed); }
+	inline bool isValid() const { return !m_closed; }
+
+	// Returns true if this scene is currently the active scene.
+	inline bool isCurrentScene() const { return m_parent.getCurrentScene() == this; }
 
 	// Get the name of the scene.
 	inline const char* getSceneName() const { return m_sceneName; }
 
 	// TODO: change to ref& for consistency?
 	// Get the parent Scene Manager.
-	inline SceneManager* getManager() { return m_parent; }
+	inline SceneManager& getManager() { return m_parent; }
 	// TODO: change to ref& for consistency?
 	// Get the parent Scene Manager.
-	inline const SceneManager* getManager() const { return m_parent; }
+	inline const SceneManager& getManager() const { return m_parent; }
 
 protected:
 	friend SceneManager;
-	Scene(SceneManager* m, const char* sceneName = "")
+	Scene(SceneManager& m, const char* sceneName = "")
 		: m_parent(m), m_closed(false), m_sceneName(sceneName) { }
 
 	// Called before the first update().
@@ -72,7 +75,7 @@ protected:
 
 
 private:
-	SceneManager* m_parent;
+	SceneManager& m_parent;
 	const char* m_sceneName;
 	bool m_closed;
 };

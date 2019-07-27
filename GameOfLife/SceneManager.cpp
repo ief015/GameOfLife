@@ -46,8 +46,15 @@ SceneManager::SceneManager()
 	videoMode.width  /= 2;
 	videoMode.height /= 2;
 
-	m_rw.create(videoMode, "GOL", sf::Style::Default);
+	sf::Uint32 windowMode = sf::Style::Default;
+
+	if (videoMode.width < 640 || videoMode.height < 480)
+		windowMode = sf::Style::Fullscreen;
+
+	m_rw.create(videoMode, "GOL", windowMode);
 	m_rw.setVerticalSyncEnabled(true);
+
+	this->getSettings().load();
 }
 
 
@@ -57,10 +64,10 @@ SceneManager::~SceneManager()
 	if (m_loadScene)
 		delete m_loadScene;
 	for (auto scene : m_scenes)
-	{
 		scene->finish();
+	for (auto scene : m_scenes)
 		delete scene;
-	}
+	this->getSettings().save();
 }
 
 
@@ -71,7 +78,7 @@ const sf::Font& SceneManager::getDefaultFont()
 	if (!loaded)
 	{
 		// TODO: font path shouldn't be hardcoded
-		const std::string fontpath = "ProggyCleanSZ.ttf";
+		const std::string fontpath = "default.ttf";
 		if (!s_defaultFont.loadFromFile(fontpath))
 		{
 			std::cerr << "could not load font (" << fontpath << ")!" << std::endl;

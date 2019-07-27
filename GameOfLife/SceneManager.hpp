@@ -52,7 +52,7 @@ public:
 	template<class TScene>
 	void load() {
 		if (m_loadScene) delete m_loadScene;
-		m_loadScene = new TScene(this);
+		m_loadScene = new TScene(*this);
 	}
 
 	// Returns true if no scenes are loaded.
@@ -94,14 +94,20 @@ public:
 	// Get user settings.
 	inline const UserSettings& getSettings() const { return m_settings; }
 
+	// Get elapsed time since SceneManager creation.
+	inline sf::Time getElapsedTime() const { return m_clock.getElapsedTime(); }
+
 private:
 	static sf::Font s_defaultFont;
+	UserSettings m_settings;
+
 	sf::RenderWindow m_rw;
+	sf::Clock m_clock;
 
 	std::list<Scene*> m_scenes;
 	Scene* m_loadScene;
 
 	bool m_autoWindowClose;
 
-	UserSettings m_settings;
+
 };

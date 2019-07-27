@@ -37,7 +37,7 @@
 class SimulationScene : public Scene
 {
 public:
-	SimulationScene(SceneManager* m) : Scene(m, "Simulation") { }
+	SimulationScene(SceneManager& m) : Scene(m, "Simulation") { }
 
 protected:
 	virtual void init()   override;
@@ -60,7 +60,6 @@ private:
 	sf::Text  m_txtDebug;
 	sf::Time  m_debugUpdateTimestamp;
 	sf::Time  m_debugRenderTimestamp;
-	sf::Clock m_clock;
 
 	struct {
 		bool mouseLeft  = false;
