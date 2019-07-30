@@ -36,7 +36,9 @@
 #include <list>
 #include "UserSettings.hpp"
 
+
 class Scene;
+
 class SceneManager final
 {
 public:
@@ -97,12 +99,25 @@ public:
 	// Get elapsed time since SceneManager creation.
 	inline sf::Time getElapsedTime() const { return m_clock.getElapsedTime(); }
 
+	// Get frames per second.
+	inline float getFramesPerSecond() const { return m_fps; }
+
+	// Get the target framerate.
+	inline float getTargetFramerate() const { return m_targetFPS; }
+
+	// Set the target framerate. (Default = 60)
+	// If framerate is zero or less, SceneManager will run at realtime speed.
+	inline void setTargetFramerate(float framerate) { m_targetFPS = std::max(0.f, framerate); }
+
 private:
 	static sf::Font s_defaultFont;
 	UserSettings m_settings;
 
 	sf::RenderWindow m_rw;
 	sf::Clock m_clock;
+	sf::Time m_timestampLastRender;
+	float m_fps;
+	float m_targetFPS;
 
 	std::list<Scene*> m_scenes;
 	Scene* m_loadScene;

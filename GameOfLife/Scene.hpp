@@ -35,6 +35,7 @@
 #include <SFML/Window.hpp>
 #include "SceneManager.hpp"
 
+
 class Scene
 {
 public:

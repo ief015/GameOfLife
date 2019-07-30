@@ -47,7 +47,14 @@ void SimulationScene::init()
 	m_stepOnce  = false;
 	m_hideIntro = false;
 	m_debugMode = 0;
-	m_camera    = rw.getView();
+
+	m_camera          = rw.getView();
+	m_cameraZoom      = 1.f;
+	m_cameraMoveSpeed = 1.f;
+
+	m_updatesPerSecond = 60.f;
+	m_lastUpdate       = this->getManager().getElapsedTime().asSeconds();
+	m_lastPreUpdate    = m_lastUpdate;
 
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))
@@ -76,15 +83,24 @@ void SimulationScene::init()
 	ss << std::endl;
 	ss << "            > start drawing cells to hide this message <" << std::endl;
 
+	sf::FloatRect bounds;
 	m_txtIntro = sf::Text(ss.str(), SceneManager::getDefaultFont(), 16);
 	m_txtIntro.setFillColor(sf::Color(255, 255, 255, 255));
-	sf::FloatRect bounds = m_txtIntro.getLocalBounds();
+	bounds = m_txtIntro.getLocalBounds();
 	m_txtIntro.setOrigin(floor(bounds.width / 2.f), floor(bounds.height / 2.f));
 
 	m_txtDebug = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txtDebug.setFillColor(sf::Color(255, 255, 255, 255));
 	m_txtDebug.setOutlineColor(sf::Color(0, 0, 0, 255));
 	m_txtDebug.setOutlineThickness(1.5f);
+	m_txtDebug.setPosition(2.f, 0.f);
+
+	m_txtPaused = sf::Text("PAUSED (press spacebar to resume)", SceneManager::getDefaultFont(), 16);
+	m_txtPaused.setFillColor(sf::Color(255, 255, 255, 255));
+	m_txtPaused.setOutlineColor(sf::Color(0, 0, 0, 255));
+	m_txtPaused.setOutlineThickness(1.5f);
+	bounds = m_txtPaused.getLocalBounds();
+	m_txtPaused.setOrigin(floor(bounds.width / 2.f), 0.f);
 }
 
 
@@ -193,6 +209,42 @@ void SimulationScene::processEvent(const sf::Event & ev)
 		case sf::Keyboard::Subtract:
 			m_controls.zoomOut = true;
 			break;
+		case sf::Keyboard::Num1:
+		case sf::Keyboard::Numpad1:
+			cameraSetZoom(1.f);
+			break;
+		case sf::Keyboard::Num2:
+		case sf::Keyboard::Numpad2:
+			cameraSetZoom(1.f / 2);
+			break;
+		case sf::Keyboard::Num3:
+		case sf::Keyboard::Numpad3:
+			cameraSetZoom(1.f / 3);
+			break;
+		case sf::Keyboard::Num4:
+		case sf::Keyboard::Numpad4:
+			cameraSetZoom(1.f / 4);
+			break;
+		case sf::Keyboard::Num5:
+		case sf::Keyboard::Numpad5:
+			cameraSetZoom(1.f / 5);
+			break;
+		case sf::Keyboard::Num6:
+		case sf::Keyboard::Numpad6:
+			cameraSetZoom(1.f / 6);
+			break;
+		case sf::Keyboard::Num7:
+		case sf::Keyboard::Numpad7:
+			cameraSetZoom(1.f / 7);
+			break;
+		case sf::Keyboard::Num8:
+		case sf::Keyboard::Numpad8:
+			cameraSetZoom(1.f / 8);
+			break;
+		case sf::Keyboard::Num9:
+		case sf::Keyboard::Numpad9:
+			cameraSetZoom(1.f / 9);
+			break;
 		}
 		break;
 
@@ -228,7 +280,8 @@ void SimulationScene::processEvent(const sf::Event & ev)
 		break;
 
 	case sf::Event::Resized:
-		m_camera.setSize(static_cast<float>(ev.size.width), static_cast<float>(ev.size.height));
+		// Refresh view with current zoom level
+		cameraSetZoom(m_cameraZoom);
 		break;
 	}
 }
@@ -237,24 +290,50 @@ void SimulationScene::processEvent(const sf::Event & ev)
 //////////////////////////////////////////////////////////////////////
 bool SimulationScene::pre_update()
 {
+	float curTime = this->getManager().getElapsedTime().asSeconds();
+	float dt      = curTime - m_lastPreUpdate;
+
+	m_lastPreUpdate += dt;
+
+	bool isMovingCam = m_controls.moveLeft || m_controls.moveRight || m_controls.moveUp || m_controls.moveDown;
+	if (isMovingCam)
+		m_cameraMoveSpeed = std::min(m_cameraMoveSpeed + (10.f * dt), 10.f);
+	else
+		m_cameraMoveSpeed = std::max(m_cameraMoveSpeed - (5.f * dt), 1.f);
+
 	if (m_controls.moveLeft)
-		m_camera.move(-3.f, 0.f);
+		m_camera.move(-m_cameraMoveSpeed * m_cameraZoom, 0.f);
 	if (m_controls.moveRight)
-		m_camera.move(3.f, 0.f);
+		m_camera.move(m_cameraMoveSpeed * m_cameraZoom, 0.f);
 	if (m_controls.moveUp)
-		m_camera.move(0.f, -3.f);
+		m_camera.move(0.f, -m_cameraMoveSpeed * m_cameraZoom);
 	if (m_controls.moveDown)
-		m_camera.move(0.f, 3.f);
+		m_camera.move(0.f, m_cameraMoveSpeed * m_cameraZoom);
 	if (m_controls.zoomIn)
-		m_camera.zoom(1.f - 0.025f);
+		cameraSetZoom(std::max(0.1f, m_cameraZoom *= 1.f - dt));
 	if (m_controls.zoomOut)
-		m_camera.zoom(1.f + 0.025f);
+		cameraSetZoom(std::min(10.f, m_cameraZoom *= 1.f + dt));
 
 	if (m_stepOnce)
 	{
 		m_stepOnce = false;
 		return true;
 	}
+
+	if (m_updatesPerSecond > 0)
+	{
+		float updateSince = (curTime - m_lastUpdate);
+		updateSince += m_debugUpdateTimestamp.asSeconds() + m_debugRenderTimestamp.asSeconds();
+		if (this->getManager().getTargetFramerate() > 0)
+			updateSince += 1.f / this->getManager().getTargetFramerate();
+		if (updateSince > (1.f / m_updatesPerSecond))
+		{
+			m_lastUpdate = curTime;
+			return !m_paused;
+		}
+		return false;
+	}
+
 	return !m_paused;
 }
 
@@ -291,16 +370,24 @@ void SimulationScene::render()
 	if (m_debugMode != 0)
 		rw.draw(m_txtDebug);
 
+	if (m_paused)
+	{
+		m_txtPaused.setPosition(static_cast<float>(screen.x / 2), 0.f);
+		rw.draw(m_txtPaused);
+	}
+
 	m_debugRenderTimestamp = this->getManager().getElapsedTime() - m_debugRenderTimestamp;
 
 	if (m_debugMode != 0)
 	{
 		std::stringstream strDebug;
-		strDebug << std::fixed << std::setprecision(2) << "DEBUG (" << m_debugMode << ")";
+		strDebug << std::fixed << std::setprecision(2);
+		strDebug << "DEBUG (" << m_debugMode << ")";
 		if (m_sim.isMultithreaded())
 			strDebug << "\nMULTITHREADED (" << m_sim.getWorkerThreadCount() << ")";
-		if (m_paused)
-			strDebug << "\nPAUSED";
+		strDebug << "\nfps         : " << static_cast<int>(this->getManager().getFramesPerSecond());
+		if (this->getManager().getTargetFramerate() > 0)
+			strDebug << " (target=" << static_cast<int>(this->getManager().getTargetFramerate()) << ")";
 		strDebug << "\nupdate (ms) : " << m_debugUpdateTimestamp.asSeconds() * 1000.f
 		         << "\nrender (ms) : " << m_debugRenderTimestamp.asSeconds() * 1000.f
 		         << "\nchunks      : " << m_sim.getChunkCount()
@@ -373,4 +460,14 @@ void SimulationScene::screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y
 	sf::Vector2f v = rw.mapPixelToCoords(sf::Vector2i(scr_x, scr_y), m_camera);
 	out_x = static_cast<int>(v.x);
 	out_y = static_cast<int>(v.y);
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void SimulationScene::cameraSetZoom(float zoom)
+{
+	sf::Vector2u sz = this->getManager().getWindow().getSize();
+	m_camera.setSize(static_cast<float>(sz.x), static_cast<float>(sz.y));
+	m_camera.zoom(zoom);
+	m_cameraZoom = zoom;
 }

@@ -33,6 +33,7 @@
 #include "SceneManager.hpp"
 #include "Scene.hpp"
 #include <iostream>
+#include <thread>
 
 
 sf::Font SceneManager::s_defaultFont = sf::Font();
@@ -42,6 +43,8 @@ sf::Font SceneManager::s_defaultFont = sf::Font();
 SceneManager::SceneManager()
 	: m_autoWindowClose(true)
 	, m_minWindowSize(500, 400)
+	, m_targetFPS(60)
+	, m_fps(0)
 {
 	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
 	videoMode.width  /= 2;
@@ -53,7 +56,7 @@ SceneManager::SceneManager()
 		windowMode = sf::Style::Fullscreen;
 
 	m_rw.create(videoMode, "GOL", windowMode);
-	m_rw.setVerticalSyncEnabled(true);
+	m_timestampLastRender = m_clock.getElapsedTime();
 
 	this->getSettings().load();
 }
@@ -69,6 +72,14 @@ SceneManager::~SceneManager()
 	for (auto scene : m_scenes)
 		delete scene;
 	this->getSettings().save();
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void SceneManager::closeAll()
+{
+	for (auto scene : m_scenes)
+		scene->close();
 }
 
 
@@ -191,15 +202,21 @@ void SceneManager::render()
 	Scene* scene = m_scenes.back();
 	if (!scene->isValid())
 		return;
+
+	// Render scene
 	m_rw.clear();
 	scene->render();
 	m_rw.display();
-}
 
+	// Calculate FPS
+	sf::Time ts = m_clock.getElapsedTime();
+	m_fps = 1.f / (ts - m_timestampLastRender).asSeconds();
+	m_timestampLastRender = ts;
 
-//////////////////////////////////////////////////////////////////////
-void SceneManager::closeAll()
-{
-	for (auto scene : m_scenes)
-		scene->close();
+	// Rest
+	if (m_targetFPS > 0.f)
+	{
+		float sleepFor = 1.f / m_targetFPS;
+		sf::sleep(sf::seconds(std::max(0.001f, sleepFor)));
+	}
 }

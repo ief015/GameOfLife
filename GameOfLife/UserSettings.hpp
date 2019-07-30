@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 
+
 class UserSettings final
 {
 public:

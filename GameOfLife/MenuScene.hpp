@@ -75,6 +75,7 @@ private:
 		int selection = 0;
 	} m_menuMain;
 
+	// Information for change ruleset menu.
 	struct {
 		int selection = 0;
 		gol::Ruleset rules;

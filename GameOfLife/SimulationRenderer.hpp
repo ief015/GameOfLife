@@ -37,6 +37,7 @@
 #include "gol/Simulation.hpp"
 #include "gol/Chunk.hpp"
 
+
 class SimulationRenderer
 {
 public:

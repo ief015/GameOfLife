@@ -34,6 +34,7 @@
 #include "gol/Simulation.hpp"
 #include "SimulationRenderer.hpp"
 
+
 class SimulationScene : public Scene
 {
 public:
@@ -46,13 +47,22 @@ protected:
 	virtual void update() override;
 	virtual void render() override;
 
+	// Get the target simulation updates/second.
+	inline float getUpdatesPerSecond() const { return m_updatesPerSecond; }
+
+	// Set the target simulation updates/second.
+	inline float setUpdatesPerSecond(float updateRate) { m_updatesPerSecond = updateRate ; }
+
 private:
 	gol::Simulation    m_sim;
 	SimulationRenderer m_renderer;
 	sf::View m_camera;
+	float    m_cameraZoom;
+	float    m_cameraMoveSpeed;
 	bool     m_paused;
 	bool     m_stepOnce;
 	int      m_debugMode;
+	float    m_updatesPerSecond;
 
 	sf::Text m_txtIntro;
 	bool     m_hideIntro;
@@ -60,6 +70,8 @@ private:
 	sf::Text  m_txtDebug;
 	sf::Time  m_debugUpdateTimestamp;
 	sf::Time  m_debugRenderTimestamp;
+
+	sf::Text m_txtPaused;
 
 	struct {
 		bool mouseLeft  = false;
@@ -73,8 +85,11 @@ private:
 		bool zoomOut    = false;
 	} m_controls;
 	
+	float m_lastPreUpdate;
+	float m_lastUpdate;
 	bool pre_update();
 	void toggleDebug(int mode);
 	void placeCells(int x, int y, int size, bool alive);
 	void screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y);
+	void cameraSetZoom(float zoom);
 };

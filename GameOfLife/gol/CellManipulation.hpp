@@ -33,6 +33,7 @@
 // manipulating cell states.
 // 
 
+
 namespace gol
 {
 

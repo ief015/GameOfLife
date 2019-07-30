@@ -268,7 +268,7 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 		}
 		else if (key == sf::Keyboard::Down && !m_menuRuleset.isUserInputting)
 		{
-			if (m_menuRuleset.selection < 2)
+			if (m_menuRuleset.selection < 1)
 			{
 				m_menuRuleset.selection++;
 				return true;

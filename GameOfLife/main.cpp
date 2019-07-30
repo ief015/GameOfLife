@@ -35,31 +35,13 @@
 //////////////////////////////////////////////////////////////////////
 int main()
 {
-	sf::Clock clk;
-	sf::Time updateTimestamp;
-	const float updatesPerSecond = 60;
-
 	SceneManager sceneManager;
-
 	sceneManager.load<MenuScene>();
-
-	clk.restart();
-	do
-	{
+	do {
 		sceneManager.pushAndPopScenes();
 		sceneManager.processEvents();
-
-		if ((clk.getElapsedTime() - updateTimestamp).asSeconds() >= 1.f / updatesPerSecond)
-		{
-			updateTimestamp = clk.getElapsedTime();
-			sceneManager.update();
-		}
-
+		sceneManager.update();
 		sceneManager.render();
-
-		sf::sleep(sf::milliseconds(1));
-
 	} while (!sceneManager.empty());
-
 	return 0;
 }
