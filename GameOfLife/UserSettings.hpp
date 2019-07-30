@@ -33,6 +33,7 @@
 // 
 
 #include <map>
+#include <unordered_map>
 #include <string>
 
 
@@ -45,7 +46,11 @@ public:
 	UserSettings();
 	~UserSettings();
 
+	// Load data from a settings file.
+	// Any unsaved changes will be discarded.
 	bool load(const std::string& path = "settings.cfg");
+	
+	// Save data to a settings file.
 	bool save(const std::string& path = "settings.cfg");
 
 	std::string getString(const TKey& key) const;
@@ -62,14 +67,21 @@ public:
 	// Returns true if key exists.
 	bool hasKey(const TKey& key) const;
 
+	// Discards any changes, reverting settings to last load or save (which ever is latest).
+	void discardChanges();
+
+	// Delete all settings.
+	// Any unsaved changes will be discarded.
+	void clear();
+
 private:
 	// load() will write data from settings tile to this map.
 	std::map<TKey, TValue> m_loadedData;
 
 	// Cached string values.
-	mutable std::map<TKey, std::string> m_strCache;
+	mutable std::unordered_map<TKey, std::string> m_strCache;
 	// Cached integer values.
-	mutable std::map<TKey, int> m_intCache;
+	mutable std::unordered_map<TKey, int> m_intCache;
 	// Cached float values.
-	mutable std::map<TKey, float> m_fltCache;
+	mutable std::unordered_map<TKey, float> m_fltCache;
 };

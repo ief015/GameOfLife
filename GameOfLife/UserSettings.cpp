@@ -33,6 +33,7 @@
 
 #include "UserSettings.hpp"
 #include <iostream>
+#include <fstream>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -52,22 +53,58 @@ UserSettings::~UserSettings()
 //////////////////////////////////////////////////////////////////////
 bool UserSettings::load(const std::string& path)
 {
+	std::ifstream f(path);
+
+	if (!f.is_open())
+		return false;
+
+	std::cout << "loading settings (" << path << ")" << std::endl;
+
+	m_loadedData.clear();
 	m_strCache.clear();
 	m_intCache.clear();
 	m_fltCache.clear();
 
-	// TODO: UserSettings::load
-	std::cout << "UserSettings::load not yet implemented" << std::endl;
-	return false;
+	for (std::string line; std::getline(f, line);)
+	{
+		size_t d = line.find_first_of('=');
+		if (d == std::string::npos)
+			continue;
+		std::string key = line.substr(0, d);
+		std::string val = line.substr(d + 1);
+		m_loadedData.emplace(key, val);
+	}
+
+	f.close();
+	return true;
 }
 
 
 //////////////////////////////////////////////////////////////////////
 bool UserSettings::save(const std::string& path)
 {
-	// TODO: UserSettings::save
-	std::cout << "UserSettings::save not yet implemented" << std::endl;
-	return false;
+	std::ofstream f(path, std::ios::trunc);
+
+	if (!f.is_open())
+	{
+		std::cerr << "could not save to file (" << path << ")" << std::endl;
+		return false;
+	}
+
+	std::cout << "saving settings (" << path << ")" << std::endl;
+
+	for (const auto& it : m_strCache)
+		m_loadedData[it.first] = it.second;
+	for (const auto& it : m_intCache)
+		m_loadedData[it.first] = std::to_string(it.second);
+	for (const auto& it : m_fltCache)
+		m_loadedData[it.first] = std::to_string(it.second);
+
+	for (const auto& it : m_loadedData)
+		f << it.first << "=" << it.second << std::endl;
+
+	f.close();
+	return true;
 }
 
 
@@ -78,7 +115,7 @@ std::string UserSettings::getString(const TKey& k) const
 	if (it == m_strCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_strCache.end())
+		if (it2 == m_loadedData.end())
 		{
 			std::cerr << "attempt to get string for nonexistent user setting: key=" << k << std::endl;
 			return std::string();
@@ -97,7 +134,7 @@ std::string UserSettings::getString(const TKey& k, const std::string& defaultVal
 	if (it == m_strCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_strCache.end())
+		if (it2 == m_loadedData.end())
 			return defaultValue;
 		// Add to cache and return value.
 		return m_strCache.emplace(k, it2->second).first->second;
@@ -113,7 +150,7 @@ int UserSettings::getInteger(const TKey& k) const
 	if (it == m_intCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_intCache.end())
+		if (it2 == m_loadedData.end())
 		{
 			std::cerr << "attempt to get integer for nonexistent user setting: key=" << k << std::endl;
 			return 0;
@@ -133,7 +170,7 @@ int UserSettings::getInteger(const TKey& k, int defaultValue) const
 	if (it == m_intCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_intCache.end())
+		if (it2 == m_loadedData.end())
 			return defaultValue;
 		int val = std::atoi(it2->second.c_str());
 		// Add to cache and return value.
@@ -150,7 +187,7 @@ float UserSettings::getFloat(const TKey& k) const
 	if (it == m_fltCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_fltCache.end())
+		if (it2 == m_loadedData.end())
 		{
 			std::cerr << "attempt to get float for nonexistent user setting: key=" << k << std::endl;
 			return 0;
@@ -170,7 +207,7 @@ float UserSettings::getFloat(const TKey& k, float defaultValue) const
 	if (it == m_fltCache.end())
 	{
 		auto it2 = m_loadedData.find(k);
-		if (it == m_fltCache.end())
+		if (it2 == m_loadedData.end())
 			return defaultValue;
 		float val = static_cast<float>(std::atof(it2->second.c_str()));
 		// Add to cache and return value.
@@ -215,4 +252,21 @@ bool UserSettings::hasKey(const TKey& key) const
 	if (m_fltCache.find(key) != m_fltCache.end())
 		return true;
 	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void UserSettings::discardChanges()
+{
+	m_strCache.clear();
+	m_intCache.clear();
+	m_fltCache.clear();
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void UserSettings::clear()
+{
+	m_loadedData.clear();
+	this->discardChanges();
 }
