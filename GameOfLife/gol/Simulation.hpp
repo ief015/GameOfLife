@@ -38,7 +38,7 @@
 
 #include "Chunk.hpp"
 #include "Ruleset.hpp"
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <thread>
 #include <atomic>
@@ -112,8 +112,8 @@ public:
 
 
 private:
-	typedef std::map<int, Chunk*> RowMap;
-	typedef std::map<int, RowMap> ColumnMap;
+	typedef std::unordered_map<int, Chunk*> RowMap;
+	typedef std::unordered_map<int, RowMap> ColumnMap;
 
 	ColumnMap m_chunks; // m_chunks[col][row]
 	unsigned int m_chunkCount;
