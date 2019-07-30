@@ -55,7 +55,7 @@ bool UserSettings::load(const std::string& path)
 {
 	std::ifstream f(path);
 
-	if (!f.is_open())
+	if (!f)
 		return false;
 
 	std::cout << "loading settings (" << path << ")" << std::endl;
@@ -85,7 +85,7 @@ bool UserSettings::save(const std::string& path)
 {
 	std::ofstream f(path, std::ios::trunc);
 
-	if (!f.is_open())
+	if (!f)
 	{
 		std::cerr << "could not save to file (" << path << ")" << std::endl;
 		return false;
