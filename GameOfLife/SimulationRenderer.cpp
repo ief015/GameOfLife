@@ -45,12 +45,7 @@ SimulationRenderer::SimulationRenderer()
 	, showChunkID(false)
 	, showChunksCellCount(false)
 {
-	/*
-	if (!m_shader.loadFromMemory(m_frag, sf::Shader::Fragment))
-	{
-		std::cerr << "could not load fragment shader!" << std::endl;
-	}
-	*/
+
 }
 
 
@@ -71,9 +66,6 @@ void SimulationRenderer::setSimulation(const Simulation& simulator)
 //////////////////////////////////////////////////////////////////////
 void SimulationRenderer::render() const
 {
-	// TODO BUG:  things aren't being rendererd in negative space
-	// TODO: only render chunks within view
-
 	sf::RectangleShape chunkRect;
 	if (showChunks)
 	{
@@ -105,8 +97,8 @@ void SimulationRenderer::render() const
 		int col = chunk->getColumn();
 		int row = chunk->getRow();
 
-		float xchunk = static_cast<float>(col * Chunk::CHUNK_SIZE);
-		float ychunk = static_cast<float>(row * Chunk::CHUNK_SIZE);
+		float xchunk = col * static_cast<float>(Chunk::CHUNK_SIZE);
+		float ychunk = row * static_cast<float>(Chunk::CHUNK_SIZE);
 
 		if ((xchunk + Chunk::CHUNK_SIZE) < cullZone.left)
 			continue;
@@ -146,7 +138,7 @@ void SimulationRenderer::render() const
 				chunkRect.setOutlineColor(sf::Color(32, 255, 255, 64));
 				break;
 			}
-			chunkRect.setPosition(static_cast<float>(col * Chunk::CHUNK_SIZE), static_cast<float>(row * Chunk::CHUNK_SIZE));
+			chunkRect.setPosition(xchunk, ychunk);
 			m_renderTarget->draw(chunkRect);
 		}
 
@@ -154,28 +146,17 @@ void SimulationRenderer::render() const
 		{
 			chunkText.setFillColor(sf::Color(255, 255, 255, 192));
 			chunkText.setString(std::to_string(chunk->getAliveCells()));
-			chunkText.setPosition(static_cast<float>(col * Chunk::CHUNK_SIZE), static_cast<float>(row * Chunk::CHUNK_SIZE));
+			chunkText.setPosition(xchunk, ychunk);
 			m_renderTarget->draw(chunkText);
 		}
 
 		if (showChunkID)
 		{
-			float y = static_cast<float>(row * Chunk::CHUNK_SIZE);
-			y += Chunk::CHUNK_SIZE - chunkText.getCharacterSize() - 4;
+			float y = ychunk + Chunk::CHUNK_SIZE - chunkText.getCharacterSize() - 4.f;
 			chunkText.setString(std::to_string(chunk->getUniqueID()));
 			chunkText.setFillColor(sf::Color(255, 255, 255, 64));
-			chunkText.setPosition(static_cast<float>(col * Chunk::CHUNK_SIZE), y);
+			chunkText.setPosition(xchunk, y);
 			m_renderTarget->draw(chunkText);
 		}
 	}
 }
-
-
-//////////////////////////////////////////////////////////////////////
-/*
-const std::string SimulationRenderer::m_frag =
-"uniform float[] cellBuffer;"\
-"void main()"\
-"{"\
-"	gl_FragColor = gl_Color;"\
-"}";*/
