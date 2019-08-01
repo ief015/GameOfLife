@@ -72,6 +72,7 @@ void SimulationRenderer::setSimulation(const Simulation& simulator)
 void SimulationRenderer::render() const
 {
 	// TODO BUG:  things aren't being rendererd in negative space
+	// TODO: only render chunks within view
 
 	sf::RectangleShape chunkRect;
 	if (showChunks)
@@ -105,38 +106,6 @@ void SimulationRenderer::render() const
 			continue;
 
 		cellGraph.clear();
-
-		// TODO REMOVE: old rendering code
-		/*
-		if (chunk->getAliveCells() > 0)
-		{
-			unsigned int processed = 0;
-			auto cells = chunk->getRawCellData();
-
-			for (int x = 0; x < static_cast<int>(Chunk::CHUNK_SIZE); x++)
-			{
-				for (int y = 0; y < static_cast<int>(Chunk::CHUNK_SIZE); y++)
-				{
-					if (IS_CELL_ALIVE(cells[x][y]))
-					{
-						float cx = static_cast<float>(x + (col * Chunk::CHUNK_SIZE));
-						float cy = static_cast<float>(y + (row * Chunk::CHUNK_SIZE));
-						cellGraph.append(sf::Vector2f(cx+1, cy+1));
-						cellGraph.append(sf::Vector2f(cx+1, cy));
-						cellGraph.append(sf::Vector2f(cx, cy));
-						cellGraph.append(sf::Vector2f(cx, cy+1));
-						processed++;
-					}
-					if (processed >= static_cast<size_t>(chunk->getAliveCells()))
-					{
-						// All cells found in this chunk, this cell graph is done.
-						x = Chunk::CHUNK_SIZE;
-						break;
-					}
-				}
-			}
-		}
-		*/
 
 		auto& cellCoords = chunk->getCellCoords();
 		for (const std::pair<int,int>& xy : cellCoords)

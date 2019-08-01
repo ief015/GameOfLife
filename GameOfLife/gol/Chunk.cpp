@@ -277,61 +277,6 @@ void Chunk::applyCellStates()
 			m_sleepMode = Sleeping;
 	}
 
-	// TODO REMOVE: disabled lines
-	/*
-	// Update sleep states for self and neighbours
-	if (m_births > 0 || m_deaths > 0)
-	{
-		Chunk* c;
-		m_sleepMode = Awake;
-
-		// Set sleeping neighbour chunks to BorderOnly
-		if (m_borderChanged)
-		{
-			if (m_north && m_north->m_sleepMode == Sleeping)
-				m_north->m_sleepMode = BorderOnly;
-			if (m_east  && m_east->m_sleepMode  == Sleeping)
-				m_east->m_sleepMode = BorderOnly;
-			if (m_south && m_south->m_sleepMode == Sleeping)
-				m_south->m_sleepMode = BorderOnly;
-			if (m_west  && m_west->m_sleepMode  == Sleeping)
-				m_west->m_sleepMode = BorderOnly;
-			if ((c = this->getNeighbour(NorthEast)) && c->m_sleepMode == Sleeping)
-				c->m_sleepMode = BorderOnly;
-			if ((c = this->getNeighbour(NorthWest)) && c->m_sleepMode == Sleeping)
-				c->m_sleepMode = BorderOnly;
-			if ((c = this->getNeighbour(SouthEast)) && c->m_sleepMode == Sleeping)
-				c->m_sleepMode = BorderOnly;
-			if ((c = this->getNeighbour(SouthWest)) && c->m_sleepMode == Sleeping)
-				c->m_sleepMode = BorderOnly;
-		}
-	}
-	else
-	{
-		// Awake neighbour chunks will keep us at least BorderOnly.
-		// Otherwise, fully sleep.
-		Chunk* c;
-		if (m_north && m_north->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if (m_east  && m_east->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if (m_south && m_south->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if (m_west  && m_west->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if ((c = this->getNeighbour(NorthEast)) && c->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if ((c = this->getNeighbour(NorthWest)) && c->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if ((c = this->getNeighbour(SouthEast)) && c->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else if ((c = this->getNeighbour(SouthWest)) && c->m_borderChanged)
-			m_sleepMode = BorderOnly;
-		else
-			m_sleepMode = Sleeping;
-	}
-	*/
-
 	this->checkInactivity();
 }
 

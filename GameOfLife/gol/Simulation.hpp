@@ -168,7 +168,7 @@ private:
 	static void ccStartWorker(Simulation* sim);
 
 	// TODO REMOVE m_ccCompletions
-	std::atomic_int m_ccCompletions;
+	std::atomic_uint m_ccCompletions;
 };
 
 }

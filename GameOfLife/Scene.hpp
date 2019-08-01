@@ -51,10 +51,8 @@ public:
 	// Get the name of the scene.
 	inline const char* getSceneName() const { return m_sceneName; }
 
-	// TODO: change to ref& for consistency?
 	// Get the parent Scene Manager.
 	inline SceneManager& getManager() { return m_parent; }
-	// TODO: change to ref& for consistency?
 	// Get the parent Scene Manager.
 	inline const SceneManager& getManager() const { return m_parent; }
 
