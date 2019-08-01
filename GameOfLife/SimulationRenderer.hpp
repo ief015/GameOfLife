@@ -48,6 +48,8 @@ public:
 
 	void render() const;
 
+	sf::FloatRect cullZone;
+
 	bool showChunks;
 	bool showChunksCellCount;
 	bool showChunkID;

@@ -92,6 +92,7 @@ public:
 	const Chunk* getChunkAt(int x, int y) const;
 
 	// Push all chunks in simulator to the vector provided.
+	// (Vector is not cleared here, data is only appended.)
 	void getAllChunks(std::vector<const Chunk*>& out_vec) const;
 
 	// Get simulation rule-set.

@@ -96,13 +96,25 @@ void SimulationRenderer::render() const
 	m_simulation->getAllChunks(m_chunkBuffer);
 
 	static sf::VertexArray cellGraph(sf::Quads, Chunk::CHUNK_SIZE * Chunk::CHUNK_SIZE * 4);
-	
+
 	for (auto chunk : m_chunkBuffer)
 	{
+		if (!chunk->isValid())
+			continue;
+
 		int col = chunk->getColumn();
 		int row = chunk->getRow();
 
-		if (!chunk->isValid())
+		float xchunk = static_cast<float>(col * Chunk::CHUNK_SIZE);
+		float ychunk = static_cast<float>(row * Chunk::CHUNK_SIZE);
+
+		if ((xchunk + Chunk::CHUNK_SIZE) < cullZone.left)
+			continue;
+		if ((ychunk + Chunk::CHUNK_SIZE) < cullZone.top)
+			continue;
+		if (xchunk > (cullZone.left + cullZone.width))
+			continue;
+		if (ychunk > (cullZone.top + cullZone.height))
 			continue;
 
 		cellGraph.clear();
@@ -110,12 +122,12 @@ void SimulationRenderer::render() const
 		auto& cellCoords = chunk->getCellCoords();
 		for (const std::pair<int,int>& xy : cellCoords)
 		{
-			float cx = static_cast<float>(xy.first  + (col * Chunk::CHUNK_SIZE));
-			float cy = static_cast<float>(xy.second + (row * Chunk::CHUNK_SIZE));
-			cellGraph.append(sf::Vector2f(cx + 1, cy + 1));
-			cellGraph.append(sf::Vector2f(cx + 1, cy));
-			cellGraph.append(sf::Vector2f(cx, cy));
-			cellGraph.append(sf::Vector2f(cx, cy + 1));
+			float xcell = static_cast<float>(xy.first  + xchunk);
+			float ycell = static_cast<float>(xy.second + ychunk);
+			cellGraph.append(sf::Vector2f(xcell + 1, ycell + 1));
+			cellGraph.append(sf::Vector2f(xcell + 1, ycell));
+			cellGraph.append(sf::Vector2f(xcell, ycell));
+			cellGraph.append(sf::Vector2f(xcell, ycell + 1));
 		}
 
 		m_renderTarget->draw(cellGraph);

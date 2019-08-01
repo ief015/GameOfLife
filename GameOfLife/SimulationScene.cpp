@@ -347,6 +347,10 @@ void SimulationScene::render()
 	auto& rw = this->getManager().getWindow();
 
 	rw.setView(m_camera);
+	m_renderer.cullZone.width  = m_camera.getSize().x;
+	m_renderer.cullZone.height = m_camera.getSize().y;
+	m_renderer.cullZone.left   = m_camera.getCenter().x - m_renderer.cullZone.width / 2;
+	m_renderer.cullZone.top    = m_camera.getCenter().y - m_renderer.cullZone.height / 2;
 	m_renderer.render();
 
 	sf::Vector2u screen = rw.getSize();
