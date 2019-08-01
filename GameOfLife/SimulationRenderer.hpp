@@ -59,7 +59,4 @@ private:
 	const gol::Simulation* m_simulation;
 
 	mutable std::vector<const gol::Chunk*> m_chunkBuffer;
-
-	//sf::Shader m_shader;
-	//static const std::string m_frag;
 };
