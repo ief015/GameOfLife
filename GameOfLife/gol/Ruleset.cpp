@@ -37,6 +37,9 @@ using namespace gol;
 
 //////////////////////////////////////////////////////////////////////
 Ruleset::Ruleset(Preset preset)
+	: m_stringOutOfDate(true)
+	, m_birthSet { false }
+	, m_survivalSet { false }
 {
 	this->set(preset);
 }
@@ -44,6 +47,9 @@ Ruleset::Ruleset(Preset preset)
 
 //////////////////////////////////////////////////////////////////////
 Ruleset::Ruleset(const std::string& bsRule)
+	: m_stringOutOfDate(true)
+	, m_birthSet { false }
+	, m_survivalSet { false }
 {
 	if (!this->set(bsRule))
 		this->set(None);

@@ -39,7 +39,7 @@
 void MenuScene::init()
 {
 	auto& rw = this->getManager().getWindow();
-	auto& settings = this->getManager().getSettings();
+	auto& settings = UserSettings::instance();
 
 	m_txt = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txt.setFillColor(sf::Color::White);
@@ -50,7 +50,6 @@ void MenuScene::init()
 		settings.setString("ruleset", m_menuRuleset.rules.getString());
 	m_menuRuleset.userInput = m_menuRuleset.rules;
 	
-	m_currentMenu = MainMenu;
 	this->invalidate();
 }
 
@@ -58,7 +57,7 @@ void MenuScene::init()
 //////////////////////////////////////////////////////////////////////
 void MenuScene::finish()
 {
-	auto& settings = this->getManager().getSettings();
+	auto& settings = UserSettings::instance();
 	settings.setString("ruleset", m_menuRuleset.rules.getString());
 }
 

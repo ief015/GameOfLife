@@ -43,6 +43,7 @@ SimulationRenderer::SimulationRenderer()
 	, m_simulation(nullptr)
 	, showChunks(false)
 	, showChunkID(false)
+	, showChunksCellCount(false)
 {
 	/*
 	if (!m_shader.loadFromMemory(m_frag, sf::Shader::Fragment))

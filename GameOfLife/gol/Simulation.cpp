@@ -48,6 +48,7 @@ Simulation::Simulation()
 	, m_ccCellCount(0)
 	, m_births(0)
 	, m_deaths(0)
+	, m_ccTask(CCTask_Update)
 {
 	// Initialize multithreaded mode
 	this->setMultithreadMode(m_multithreaded);

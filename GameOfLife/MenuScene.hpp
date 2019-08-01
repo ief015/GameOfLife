@@ -40,7 +40,10 @@
 class MenuScene : public Scene
 {
 public:
-	MenuScene(SceneManager& m) : Scene(m, "Menu") { }
+	MenuScene(SceneManager& m)
+		: Scene(m, "Menu")
+		, m_currentMenu(MainMenu)
+	{ }
 
 	// Invalidate on-screen text.
 	void invalidate();
@@ -82,7 +85,7 @@ private:
 		std::string userInput;
 		bool isUserInputting = false;
 		bool userInputValid = true;
-		size_t caretPos;
+		size_t caretPos = 0;
 		void checkValid() {
 			gol::Ruleset rules;
 			userInputValid = rules.set(userInput);

@@ -37,11 +37,13 @@ int main()
 {
 	SceneManager sceneManager;
 	sceneManager.load<MenuScene>();
+	UserSettings::instance().load();
 	do {
 		sceneManager.pushAndPopScenes();
 		sceneManager.processEvents();
 		sceneManager.update();
 		sceneManager.render();
 	} while (!sceneManager.empty());
+	UserSettings::instance().save();
 	return 0;
 }

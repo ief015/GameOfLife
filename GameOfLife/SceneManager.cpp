@@ -45,6 +45,7 @@ SceneManager::SceneManager()
 	, m_minWindowSize(500, 400)
 	, m_targetFPS(60)
 	, m_fps(0)
+	, m_loadScene(nullptr)
 {
 	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
 	videoMode.width  /= 2;
@@ -57,8 +58,6 @@ SceneManager::SceneManager()
 
 	m_rw.create(videoMode, "GOL", windowMode);
 	m_timestampLastRender = m_clock.getElapsedTime();
-
-	this->getSettings().load();
 }
 
 
@@ -71,7 +70,6 @@ SceneManager::~SceneManager()
 		scene->finish();
 	for (auto scene : m_scenes)
 		delete scene;
-	this->getSettings().save();
 }
 
 
@@ -89,12 +87,14 @@ const sf::Font& SceneManager::getDefaultFont()
 	static bool loaded = false;
 	if (!loaded)
 	{
-		// TODO: font path shouldn't be hardcoded
-		const std::string fontpath = "default.ttf";
+		auto& settings = UserSettings::instance();
+		std::string fontpath = "default.ttf";
+		if (!settings.hasKey("font"))
+			settings.setString("font", fontpath);
+		else
+			fontpath = settings.getString("font", fontpath);
 		if (!s_defaultFont.loadFromFile(fontpath))
-		{
 			std::cerr << "could not load font (" << fontpath << ")!" << std::endl;
-		}
 		loaded = true;
 	}
 	return s_defaultFont;
@@ -155,10 +155,16 @@ void SceneManager::processEvents()
 			{
 				bool bMinThresh = false;
 				unsigned int nw = ev.size.width, nh = ev.size.height;
-				if ((nw < m_minWindowSize.x) && (bMinThresh = true))
+				if (nw < m_minWindowSize.x)
+				{
 					nw = m_minWindowSize.x;
-				if ((nh < m_minWindowSize.y) && (bMinThresh = true))
+					bMinThresh = true;
+				}
+				if (nh < m_minWindowSize.y)
+				{
 					nh = m_minWindowSize.y;
+					bMinThresh = true;
+				}
 				if (!bMinThresh)
 				{
 					m_rw.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(nw), static_cast<float>(nh))));

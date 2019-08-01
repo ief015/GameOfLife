@@ -57,6 +57,7 @@ Chunk::Chunk(Simulation* sim, int col, int row)
 	, m_births(0)
 	, m_deaths(0)
 	, m_borderChanged(false)
+	, m_cellCoordsInvalid(false)
 {
 	if (sim == nullptr)
 		return;

@@ -39,22 +39,13 @@
 void SimulationScene::init()
 {
 	auto& rw = this->getManager().getWindow();
-	auto& settings = this->getManager().getSettings();
+	auto& settings = UserSettings::instance();
 	m_renderer.setRenderTarget(rw);
 	m_renderer.setSimulation(m_sim);
 
-	m_paused    = true;
-	m_stepOnce  = false;
-	m_hideIntro = false;
-	m_debugMode = 0;
-
-	m_camera          = rw.getView();
-	m_cameraZoom      = 1.f;
-	m_cameraMoveSpeed = 1.f;
-
-	m_updatesPerSecond = 60.f;
-	m_lastUpdate       = this->getManager().getElapsedTime().asSeconds();
-	m_lastPreUpdate    = m_lastUpdate;
+	m_camera        = rw.getView();
+	m_lastUpdate    = this->getManager().getElapsedTime().asSeconds();
+	m_lastPreUpdate = m_lastUpdate;
 
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))

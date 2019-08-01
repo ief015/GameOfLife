@@ -38,7 +38,18 @@
 class SimulationScene : public Scene
 {
 public:
-	SimulationScene(SceneManager& m) : Scene(m, "Simulation") { }
+	SimulationScene(SceneManager& m)
+		: Scene(m, "Simulation")
+		, m_paused(true)
+		, m_stepOnce(false)
+		, m_hideIntro(false)
+		, m_debugMode(0)
+		, m_cameraZoom(1.f)
+		, m_cameraMoveSpeed(1.f)
+		, m_updatesPerSecond(60.f)
+		, m_lastUpdate(0.f)
+		, m_lastPreUpdate(0.f)
+	{ }
 
 protected:
 	virtual void init()   override;

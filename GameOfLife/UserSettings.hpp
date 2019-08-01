@@ -43,9 +43,6 @@ public:
 	typedef std::string TKey;
 	typedef std::string TValue;
 
-	UserSettings();
-	~UserSettings();
-
 	// Load data from a settings file.
 	// Any unsaved changes will be discarded.
 	bool load(const std::string& path = "settings.cfg");
@@ -74,7 +71,17 @@ public:
 	// Any unsaved changes will be discarded.
 	void clear();
 
+	// Get UserSettngs instance.
+	static UserSettings& instance() {
+		static UserSettings inst;
+		return inst;
+	}
+	UserSettings(UserSettings const&)   = delete;
+	void operator=(UserSettings const&) = delete;
+
 private:
+	UserSettings() { }
+
 	// load() will write data from settings tile to this map.
 	std::map<TKey, TValue> m_loadedData;
 

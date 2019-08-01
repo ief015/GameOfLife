@@ -91,11 +91,6 @@ public:
 	// Get if automatic close event is enabled. See setAutoWindowClose.
 	inline bool getAutoWindowClose() const { return m_autoWindowClose; }
 
-	// Get user settings.
-	inline UserSettings& getSettings() { return m_settings; }
-	// Get user settings.
-	inline const UserSettings& getSettings() const { return m_settings; }
-
 	// Get elapsed time since SceneManager creation.
 	inline sf::Time getElapsedTime() const { return m_clock.getElapsedTime(); }
 
@@ -111,7 +106,6 @@ public:
 
 private:
 	static sf::Font s_defaultFont;
-	UserSettings m_settings;
 
 	sf::RenderWindow m_rw;
 	sf::Clock m_clock;
