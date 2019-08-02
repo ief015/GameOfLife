@@ -30,11 +30,13 @@
 // 
 
 #include "MenuScene.hpp"
-
+#include "Version.hpp"
+#include <iostream>
 
 //////////////////////////////////////////////////////////////////////
 int main()
 {
+	std::cout << "game of life v" << VERSION_STRING << std::endl << std::endl;
 	SceneManager sceneManager;
 	sceneManager.load<MenuScene>();
 	UserSettings::instance().load();

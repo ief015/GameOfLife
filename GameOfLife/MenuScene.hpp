@@ -58,6 +58,7 @@ protected:
 private:
 	std::stringstream m_ss;
 	sf::Text m_txt;
+	sf::Text m_txtVersion;
 
 	// When text is typed.
 	// Returns true if on-screen text update is needed.

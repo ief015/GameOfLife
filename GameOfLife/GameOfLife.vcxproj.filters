@@ -74,5 +74,13 @@
     <ClInclude Include="UserSettings.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Version.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameOfLife.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -30,6 +30,7 @@
 // Implements class MenuScene
 // 
 
+#include "Version.hpp"
 #include "MenuScene.hpp"
 #include "SimulationScene.hpp"
 #include "gol/Ruleset.hpp"
@@ -43,6 +44,10 @@ void MenuScene::init()
 
 	m_txt = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txt.setFillColor(sf::Color::White);
+
+	m_txtVersion = sf::Text("ver " VERSION_STRING, SceneManager::getDefaultFont(), 16);
+	m_txtVersion.setOrigin(-2.f, m_txtVersion.getCharacterSize() + 2.f);
+	m_txtVersion.setFillColor(sf::Color::White);
 
 	// Default is B3/S23 (Conway's Game of Life)
 	m_menuRuleset.rules.set(gol::Ruleset::GameOfLife);
@@ -104,6 +109,8 @@ void MenuScene::render()
 	auto screen = rw.getSize();
 	m_txt.setPosition(static_cast<float>(screen.x / 2), static_cast<float>(screen.y / 2));
 	rw.draw(m_txt);
+	m_txtVersion.setPosition(0.f, static_cast<float>(screen.y));
+	rw.draw(m_txtVersion);
 }
 
 
