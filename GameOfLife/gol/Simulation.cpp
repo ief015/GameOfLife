@@ -333,9 +333,10 @@ Chunk* Simulation::createChunk(int col, int row)
 //////////////////////////////////////////////////////////////////////
 Chunk* Simulation::getChunkAt(int x, int y, bool autoCreate)
 {
+	// TODO: bug, inaccurately placing cells in negative coordinates
 	int col, row;
-	col = x / Chunk::CHUNK_SIZE;
-	row = y / Chunk::CHUNK_SIZE;
+	col = x / static_cast<int>(Chunk::CHUNK_SIZE);
+	row = y / static_cast<int>(Chunk::CHUNK_SIZE);
 
 	// Auto-create it if requested
 	if (autoCreate)
@@ -360,8 +361,8 @@ Chunk* Simulation::getChunkAt(int x, int y, bool autoCreate)
 const Chunk* Simulation::getChunkAt(int x, int y) const
 {
 	int col, row;
-	col = x / Chunk::CHUNK_SIZE;
-	row = y / Chunk::CHUNK_SIZE;
+	col = x / static_cast<int>(Chunk::CHUNK_SIZE);
+	row = y / static_cast<int>(Chunk::CHUNK_SIZE);
 
 	auto itMapCol = m_chunks.find(col);
 	if (itMapCol != m_chunks.end())

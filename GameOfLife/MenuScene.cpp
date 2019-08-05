@@ -35,6 +35,8 @@
 #include "SimulationScene.hpp"
 #include "gol/Ruleset.hpp"
 
+#define BOOLRAND() (std::rand() % 2 == 0)
+
 
 //////////////////////////////////////////////////////////////////////
 void MenuScene::init()
@@ -159,7 +161,8 @@ void MenuScene::invalidate()
 		}
 		else
 			m_ss << " (" << m_menuRuleset.rules << ")" << std::endl;
-		m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "back" << std::endl;
+		m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "randomize" << std::endl;
+		m_ss << "      " << (m_menuRuleset.selection == 2 ? "> " : "  ") << "back" << std::endl;
 		
 		break;
 	}
@@ -266,7 +269,17 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 				m_menuRuleset.isUserInputting = !m_menuRuleset.isUserInputting;
 				return true;
 			}
-			else if (m_menuRuleset.selection == 1) // back
+			else if (m_menuRuleset.selection == 1) // randomize
+			{
+				m_menuRuleset.rules.setBirth(BOOLRAND() && BOOLRAND(), BOOLRAND() && BOOLRAND(), BOOLRAND(), BOOLRAND(),
+					BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
+				m_menuRuleset.rules.setSurvival(BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(),
+					BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
+				m_menuRuleset.userInput = m_menuRuleset.rules;
+				m_menuRuleset.userInputValid = true;
+				return true;
+			}
+			else if (m_menuRuleset.selection == 2) // back
 			{
 				m_currentMenu = MainMenu;
 				return true;
@@ -274,7 +287,7 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 		}
 		else if (key == sf::Keyboard::Down && !m_menuRuleset.isUserInputting)
 		{
-			if (m_menuRuleset.selection < 1)
+			if (m_menuRuleset.selection < 2)
 			{
 				m_menuRuleset.selection++;
 				return true;
@@ -318,6 +331,11 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 		else if (key == sf::Keyboard::End && m_menuRuleset.isUserInputting)
 		{
 			m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
+			return true;
+		}
+		else if (key == sf::Keyboard::Escape)
+		{
+			m_currentMenu = MainMenu;
 			return true;
 		}
 		break;

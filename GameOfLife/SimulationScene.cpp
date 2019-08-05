@@ -64,6 +64,7 @@ void SimulationScene::init()
 	ss << "w/up a/left s/down d/right : move camera " << std::endl;
 	ss << "            equals/keypad+ : zoom in camera" << std::endl;
 	ss << "            hyphen/keypad- : zoom out camera" << std::endl;
+	ss << "             1-9/keypad1-9 : set zoom level" << std::endl;
 	ss << "                    period : step once (while paused)" << std::endl;
 	ss << "                  spacebar : pause/resume simulation" << std::endl;
 	ss << "                         r : reset simulation" << std::endl;
