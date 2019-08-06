@@ -98,8 +98,6 @@ void Simulation::step()
 			// Assign workers new task
 			m_ccTask = task;
 
-			m_ccCompletions = 0;
-
 			// Give workers chunks to process
 			for (auto itCol : m_chunks)
 			{
@@ -124,13 +122,6 @@ void Simulation::step()
 					m_ccSync.notify_all();
 
 				std::this_thread::yield();
-			}
-
-			if (m_ccCompletions != m_chunkCount) // TODO REMOVE BLOCK
-			{
-				std::cerr << "error during task " << (m_ccTask == CCTask_Update ? "UPDATE" : "APPLY");
-				std::cerr << std::endl << ". chunks processed: ";
-				std::cerr << m_ccCompletions << " / " << m_chunkCount << std::endl;
 			}
 		}
 
@@ -211,7 +202,6 @@ void Simulation::ccStartWorker(Simulation* sim)
 				sim->m_ccCellCount += chunk->getAliveCells();
 				break;
 			}
-			sim->m_ccCompletions++;
 		}
 	}
 }

@@ -167,9 +167,6 @@ private:
 	std::atomic_int m_ccBirths;
 	std::atomic_int m_ccDeaths;
 	static void ccStartWorker(Simulation* sim);
-
-	// TODO REMOVE m_ccCompletions
-	std::atomic_uint m_ccCompletions;
 };
 
 }

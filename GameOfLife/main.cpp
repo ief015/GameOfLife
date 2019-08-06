@@ -37,13 +37,11 @@
 int main()
 {
 	std::cout << "game of life v" << VERSION_STRING << std::endl << std::endl;
-	std::srand(std::time(nullptr));
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 	SceneManager sceneManager;
 	sceneManager.load<MenuScene>();
 	UserSettings::instance().load();
 	do {
-		sceneManager.pushAndPopScenes();
-		sceneManager.processEvents();
 		sceneManager.update();
 		sceneManager.render();
 	} while (!sceneManager.empty());

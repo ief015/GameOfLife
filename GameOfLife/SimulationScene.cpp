@@ -44,8 +44,7 @@ void SimulationScene::init()
 	m_renderer.setSimulation(m_sim);
 
 	m_camera        = rw.getView();
-	m_lastUpdate    = this->getManager().getElapsedTime().asSeconds();
-	m_lastPreUpdate = m_lastUpdate;
+	m_lastPreUpdate = this->getManager().getElapsedTime().asSeconds();
 
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))
@@ -280,13 +279,12 @@ void SimulationScene::processEvent(const sf::Event & ev)
 
 
 //////////////////////////////////////////////////////////////////////
-bool SimulationScene::pre_update()
+int SimulationScene::pre_update()
 {
-	float curTime = this->getManager().getElapsedTime().asSeconds();
-	float dt      = curTime - m_lastPreUpdate;
-
-	m_lastPreUpdate += dt;
-
+	float curTime   = this->getManager().getElapsedTime().asSeconds();
+	float dt        = curTime - m_lastPreUpdate;
+	m_lastPreUpdate = curTime;
+	
 	bool isMovingCam = m_controls.moveLeft || m_controls.moveRight || m_controls.moveUp || m_controls.moveDown;
 	if (isMovingCam)
 		m_cameraMoveSpeed = std::min(m_cameraMoveSpeed + (10.f * dt), 10.f);
@@ -309,45 +307,56 @@ bool SimulationScene::pre_update()
 	if (m_stepOnce)
 	{
 		m_stepOnce = false;
-		return true;
+		return 1;
 	}
 
-	if (m_updatesPerSecond > 0)
+	if (m_paused)
+		return 0;
+
+	if (m_targetStepsPerSecond > 0)
 	{
-		float updateSince = (curTime - m_lastUpdate);
-		updateSince += m_debugUpdateTimestamp.asSeconds() + m_debugRenderTimestamp.asSeconds();
-		if (this->getManager().getTargetFramerate() > 0)
-			updateSince += 1.f / this->getManager().getTargetFramerate();
-		if (updateSince > (1.f / m_updatesPerSecond))
-		{
-			m_lastUpdate = curTime;
-			return !m_paused;
-		}
-		return false;
+		m_stepAccumulator += dt;
+		float stepTime = (1.f / m_targetStepsPerSecond);
+		int steps = static_cast<int>(m_stepAccumulator / stepTime);
+		if (steps > 0)
+			m_stepAccumulator -= (stepTime * steps);
+		return steps;
 	}
 
-	return !m_paused;
+	return 1;
 }
 
 
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::update()
 {
-	if (!pre_update())
-		return;
-	m_debugUpdateTimestamp = this->getManager().getElapsedTime();
-	m_sim.step();
-	m_debugUpdateTimestamp = this->getManager().getElapsedTime() - m_debugUpdateTimestamp;
+	int stepsFinished, steps = pre_update();
+	float curTime = this->getManager().getElapsedTime().asSeconds();
+	for (stepsFinished = 0; stepsFinished < steps; stepsFinished++)
+	{
+		m_sim.step();
+
+		// Break when we've been stepping for too long
+		if (this->getManager().getElapsedTime().asSeconds() - curTime > 1.f)
+			break;
+	}
+
+	m_debugStepsPerSecond = 0;
+	if (steps > 0)
+	{
+		float elapsedTime = this->getManager().getElapsedTime().asSeconds() - curTime;
+		float stepTime = (1.f / elapsedTime) * stepsFinished;
+		m_debugStepsPerSecond = std::min(m_targetStepsPerSecond, stepTime);
+	}
 }
 
 
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::render()
 {
-	m_debugRenderTimestamp = this->getManager().getElapsedTime();
 	auto& rw = this->getManager().getWindow();
-
 	rw.setView(m_camera);
+
 	m_renderer.cullZone.width  = m_camera.getSize().x;
 	m_renderer.cullZone.height = m_camera.getSize().y;
 	m_renderer.cullZone.left   = m_camera.getCenter().x - m_renderer.cullZone.width / 2;
@@ -372,20 +381,25 @@ void SimulationScene::render()
 		rw.draw(m_txtPaused);
 	}
 
-	m_debugRenderTimestamp = this->getManager().getElapsedTime() - m_debugRenderTimestamp;
-
 	if (m_debugMode != 0)
 	{
 		std::stringstream strDebug;
 		strDebug << std::fixed << std::setprecision(2);
 		strDebug << "DEBUG (" << m_debugMode << ")";
+		
 		if (m_sim.isMultithreaded())
 			strDebug << "\nMULTITHREADED (" << m_sim.getWorkerThreadCount() << ")";
-		strDebug << "\nfps         : " << static_cast<int>(this->getManager().getFramesPerSecond());
+		
+		strDebug << "\nframes/sec  : " << static_cast<int>(this->getManager().getFramesPerSecond());
 		if (this->getManager().getTargetFramerate() > 0)
 			strDebug << " (target=" << static_cast<int>(this->getManager().getTargetFramerate()) << ")";
-		strDebug << "\nupdate (ms) : " << m_debugUpdateTimestamp.asSeconds() * 1000.f
-		         << "\nrender (ms) : " << m_debugRenderTimestamp.asSeconds() * 1000.f
+		
+		strDebug << "\nsteps/sec   : " << static_cast<int>(this->getStepsPerSecond());
+		if (this->getTargetStepsPerSecond() > 0)
+			strDebug << " (target=" << static_cast<int>(this->getTargetStepsPerSecond()) << ")";
+
+		strDebug << "\nupdate (ms) : " << this->getManager().getProfiledUpdateTime() * 1000.f
+		         << "\nrender (ms) : " << this->getManager().getProfiledRenderTime() * 1000.f
 		         << "\nchunks      : " << m_sim.getChunkCount()
 		         << "\npopulation  : " << m_sim.getPopulation()
 		         << "\nbirths      : " << m_sim.getBirths()

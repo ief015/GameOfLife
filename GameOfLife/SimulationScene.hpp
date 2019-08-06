@@ -46,10 +46,21 @@ public:
 		, m_debugMode(0)
 		, m_cameraZoom(1.f)
 		, m_cameraMoveSpeed(1.f)
-		, m_updatesPerSecond(60.f)
-		, m_lastUpdate(0.f)
+		, m_targetStepsPerSecond(60.f)
+		, m_debugStepsPerSecond(0.f)
 		, m_lastPreUpdate(0.f)
+		, m_stepAccumulator(0.f)
 	{ }
+
+	// Get steps/second performance.
+	inline float getStepsPerSecond() const { return m_debugStepsPerSecond; }
+
+	// Get the target simulation steps/second.
+	inline float getTargetStepsPerSecond() const { return m_targetStepsPerSecond; }
+
+	// Set the target simulation steps/second.
+	// Setting to 0 disables update limiting and will step once per frame.
+	inline float setTargetStepsPerSecond(float updateRate) { m_targetStepsPerSecond = updateRate; }
 
 protected:
 	virtual void init()   override;
@@ -57,12 +68,6 @@ protected:
 	virtual void processEvent(const sf::Event & ev) override;
 	virtual void update() override;
 	virtual void render() override;
-
-	// Get the target simulation updates/second.
-	inline float getUpdatesPerSecond() const { return m_updatesPerSecond; }
-
-	// Set the target simulation updates/second.
-	inline float setUpdatesPerSecond(float updateRate) { m_updatesPerSecond = updateRate ; }
 
 private:
 	gol::Simulation    m_sim;
@@ -73,15 +78,12 @@ private:
 	bool     m_paused;
 	bool     m_stepOnce;
 	int      m_debugMode;
-	float    m_updatesPerSecond;
+	float    m_debugStepsPerSecond;
+	float    m_targetStepsPerSecond;
 
 	sf::Text m_txtIntro;
 	bool     m_hideIntro;
-
-	sf::Text  m_txtDebug;
-	sf::Time  m_debugUpdateTimestamp;
-	sf::Time  m_debugRenderTimestamp;
-
+	sf::Text m_txtDebug;
 	sf::Text m_txtPaused;
 
 	struct {
@@ -97,8 +99,8 @@ private:
 	} m_controls;
 	
 	float m_lastPreUpdate;
-	float m_lastUpdate;
-	bool pre_update();
+	float m_stepAccumulator;
+	int pre_update();
 	void toggleDebug(int mode);
 	void placeCells(int x, int y, int size, bool alive);
 	void screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y);

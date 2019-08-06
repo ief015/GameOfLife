@@ -57,7 +57,9 @@ SceneManager::SceneManager()
 		windowMode = sf::Style::Fullscreen;
 
 	m_rw.create(videoMode, "GOL", windowMode);
-	m_timestampLastRender = m_clock.getElapsedTime();
+
+	m_clock.restart();
+	m_clockSleep.restart();
 }
 
 
@@ -191,38 +193,53 @@ void SceneManager::processEvents()
 //////////////////////////////////////////////////////////////////////
 void SceneManager::update()
 {
+	sf::Time curTime = m_clock.getElapsedTime();
+
+	this->pushAndPopScenes();
+	this->processEvents();
+
 	if (m_scenes.empty())
 		return;
 	Scene* scene = m_scenes.back();
 	if (!scene->isValid())
 		return;
+
 	scene->update();
+
+	m_debugUpdateTimestamp = m_clock.getElapsedTime() - curTime;
 }
 
 
 //////////////////////////////////////////////////////////////////////
 void SceneManager::render()
 {
+	sf::Time curTime = m_clock.getElapsedTime();
+
 	if (m_scenes.empty())
 		return;
 	Scene* scene = m_scenes.back();
 	if (!scene->isValid())
 		return;
 
-	// Render scene
 	m_rw.clear();
 	scene->render();
 	m_rw.display();
 
 	// Calculate FPS
 	sf::Time ts = m_clock.getElapsedTime();
-	m_fps = 1.f / (ts - m_timestampLastRender).asSeconds();
-	m_timestampLastRender = ts;
+	m_fps = 1.f / (ts - m_debugLastRenderTimestamp).asSeconds();
+	m_debugLastRenderTimestamp = ts;
+
+	m_debugRenderTimestamp = m_clock.getElapsedTime() - curTime;
 
 	// Rest
-	if (m_targetFPS > 0.f)
+	if (m_targetFPS > 0)
 	{
-		float sleepFor = 1.f / m_targetFPS;
-		sf::sleep(sf::seconds(std::max(0.001f, sleepFor)));
+		// Essentially the same as sf::Window::display()'s sleep method
+		// This was done outside of SFML to exclude the sleep period from the profiled render time
+		sf::sleep(sf::seconds(1.f / m_targetFPS) - m_clockSleep.getElapsedTime());
+
+		// Reset here instead of as inline parameter, that way it is reset AFTER the sleep period
+		m_clockSleep.restart();
 	}
 }

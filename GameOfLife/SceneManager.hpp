@@ -63,14 +63,8 @@ public:
 	// Close all scenes.
 	void closeAll();
 
-	// Push scenes if a scene is ready to be loaded. Invalid/closed scenes will be removed and destroyed.
-	// init() and finish() are called on current scene.
-	void pushAndPopScenes();
-	// Poll user events and pass to current scene.
-	// processEvents() is called on current scene.
-	void processEvents();
 	// Update current scene.
-	// update() is called on current scene.
+	// init(), finish(), processEvents(), and update() are called on current scene.
 	void update();
 	// Render current scene.
 	// render() is called on current scene.
@@ -97,6 +91,12 @@ public:
 	// Get frames per second.
 	inline float getFramesPerSecond() const { return m_fps; }
 
+	// Get the elapsed time during last update() call, in seconds.
+	inline float getProfiledUpdateTime() const { return m_debugUpdateTimestamp.asSeconds(); }
+
+	// Get the elapsed time during last render() call, in seconds.
+	inline float getProfiledRenderTime() const { return m_debugRenderTimestamp.asSeconds(); }
+
 	// Get the target framerate.
 	inline float getTargetFramerate() const { return m_targetFPS; }
 
@@ -105,13 +105,24 @@ public:
 	inline void setTargetFramerate(float framerate) { m_targetFPS = std::max(0.f, framerate); }
 
 private:
+	// Push scenes if a scene is ready to be loaded. Invalid/closed scenes will be removed and destroyed.
+	// init() and finish() are called on current scene.
+	void pushAndPopScenes();
+	// Poll user events and pass to current scene.
+	// processEvents() is called on current scene.
+	void processEvents();
+
 	static sf::Font s_defaultFont;
 
 	sf::RenderWindow m_rw;
 	sf::Clock m_clock;
-	sf::Time m_timestampLastRender;
+	sf::Clock m_clockSleep;
 	float m_fps;
 	float m_targetFPS;
+
+	sf::Time m_debugLastRenderTimestamp;
+	sf::Time m_debugUpdateTimestamp;
+	sf::Time m_debugRenderTimestamp;
 
 	std::list<Scene*> m_scenes;
 	Scene* m_loadScene;
