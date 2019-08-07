@@ -56,7 +56,15 @@ void MenuScene::init()
 	if (!settings.hasKey("ruleset") || !m_menuRuleset.rules.set(settings.getString("ruleset")))
 		settings.setString("ruleset", m_menuRuleset.rules.getString());
 	m_menuRuleset.userInput = m_menuRuleset.rules;
-	
+
+	int targetFramerate = UserSettings::instance().getInteger("target_framerate", 60);
+	this->getManager().setTargetFramerate(static_cast<float>(targetFramerate));
+	for (int i = 0; i < m_menuSettings.targetFPSMax; i++)
+	{
+		if (m_menuSettings.targetFramerateArr[i] <= targetFramerate)
+			m_menuSettings.targetFPSIdx = i;
+	}
+
 	this->invalidate();
 }
 
@@ -124,46 +132,14 @@ void MenuScene::invalidate()
 
 	switch (m_currentMenu)
 	{
-
 	case MainMenu:
-		m_ss << "          GAME OF LIFE" << std::endl;
-		m_ss << "      a cellular automaton" << std::endl;
-		m_ss << std::endl;
-		m_ss << std::endl;
-		m_ss << "implementation by nathan cousins" << std::endl;
-		m_ss << std::endl;
-		m_ss << std::endl;
-		m_ss << "      " << (m_menuMain.selection == 0 ? "> " : "  ") << "start (" << m_menuRuleset.rules << ")" << std::endl;
-		m_ss << "      " << (m_menuMain.selection == 1 ? "> " : "  ") << "change ruleset" << std::endl;
-		m_ss << "      " << (m_menuMain.selection == 2 ? "> " : "  ") << "exit" << std::endl;
-		m_ss << std::endl;
-		m_ss << std::endl;
-		m_ss << "up/down arrows : change selection" << std::endl;
-		m_ss << "        return : make selection" << std::endl;
+		this->menuMain_onInvalidate();
 		break;
-
 	case ChangeRuleset:
-		m_ss << "          RULESET" << std::endl;
-		m_ss << std::endl;
-		m_ss << std::endl;
-		if (m_menuRuleset.userInputValid)
-			m_ss << std::endl;
-		else
-			m_ss << "   invalid B/S rulestring" << std::endl;
-		m_ss << std::endl;
-		m_ss << std::endl;
-		m_ss << "      " << (m_menuRuleset.selection == 0 ? "> " : "  ") << "enter ruleset";
-		if (m_menuRuleset.isUserInputting)
-		{
-			std::string withCaret(m_menuRuleset.userInput);
-			withCaret.insert(m_menuRuleset.caretPos, 1, '_');
-			m_ss << ": " << withCaret << std::endl;
-		}
-		else
-			m_ss << " (" << m_menuRuleset.rules << ")" << std::endl;
-		m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "randomize" << std::endl;
-		m_ss << "      " << (m_menuRuleset.selection == 2 ? "> " : "  ") << "back" << std::endl;
-		
+		this->menuRuleset_onInvalidate();
+		break;
+	case Settings:
+		this->menuSettings_onInvalidate();
 		break;
 	}
 
@@ -179,27 +155,12 @@ bool MenuScene::onText(sf::Uint32 unicode)
 	switch (m_currentMenu)
 	{
 	case MainMenu:
-		break;
-
+		return this->menuMain_onText(unicode);
 	case ChangeRuleset:
-		if (m_menuRuleset.isUserInputting)
-		{
-			std::string str = sf::String(unicode).toAnsiString();
-			if (!str.empty())
-			{
-				char c = str[0];
-				if (isdigit(c) || c == '/' || c == 'b' || c == 's')
-				{
-					m_menuRuleset.userInput.insert(m_menuRuleset.caretPos, 1, c);
-					m_menuRuleset.checkValid();
-					m_menuRuleset.caretPos++;
-					return true;
-				}
-			}
-		}
-		break;
+		return this->menuRuleset_onText(unicode);
+	case Settings:
+		return this->menuSettings_onText(unicode);
 	}
-
 	return false;
 }
 
@@ -209,83 +170,158 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 {
 	switch (m_currentMenu)
 	{
-
-	//////////////////////////////////////////////////////////////
 	case MainMenu:
-		if (key == sf::Keyboard::Return)
-		{
-			if (m_menuMain.selection == 0) //> start
-			{
-				this->getManager().load<SimulationScene>();
-				this->close();
-				return false;
-			}
-			else if (m_menuMain.selection == 1) //> change ruleset
-			{
-				m_currentMenu = ChangeRuleset;
-				return true;
-			}
-			else if (m_menuMain.selection == 2) //> exit
-			{
-				this->getManager().closeAll();
-				return false;
-			}
-		}
-		else if (key == sf::Keyboard::Down)
-		{
-			if (m_menuMain.selection < 2)
-			{
-				m_menuMain.selection++;
-				return true;
-			}
-		}
-		else if (key == sf::Keyboard::Up)
-		{
-			if (m_menuMain.selection > 0)
-			{
-				m_menuMain.selection--;
-				return true;
-			}
-		}
-		break;
-
-	//////////////////////////////////////////////////////////////
+		return this->menuMain_onKeyPress(key);
 	case ChangeRuleset:
-		if (key == sf::Keyboard::Return)
+		return this->menuRuleset_onKeyPress(key);
+	case Settings:
+		return this->menuSettings_onKeyPress(key);
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void MenuScene::menuMain_onInvalidate()
+{
+	m_ss << "          GAME OF LIFE" << std::endl;
+	m_ss << "      a cellular automaton" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	m_ss << "implementation by nathan cousins" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	m_ss << "      " << (m_menuMain.selection == 0 ? "> " : "  ") << "start (" << m_menuRuleset.rules << ")" << std::endl;
+	m_ss << "      " << (m_menuMain.selection == 1 ? "> " : "  ") << "change ruleset" << std::endl;
+	m_ss << "      " << (m_menuMain.selection == 2 ? "> " : "  ") << "settings" << std::endl;
+	m_ss << "      " << (m_menuMain.selection == 3 ? "> " : "  ") << "exit" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	m_ss << "up/down arrows : change selection" << std::endl;
+	m_ss << "        return : make selection" << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuMain_onKeyPress(sf::Keyboard::Key key)
+{
+	if (key == sf::Keyboard::Return)
+	{
+		if (m_menuMain.selection == 0) //> start
 		{
-			if (m_menuRuleset.selection == 0) // enter ruleset
+			this->getManager().load<SimulationScene>();
+			this->close();
+			return false;
+		}
+		else if (m_menuMain.selection == 1) //> change ruleset
+		{
+			m_currentMenu = ChangeRuleset;
+			return true;
+		}
+		else if (m_menuMain.selection == 2) //> settings
+		{
+			m_currentMenu = Settings;
+			return true;
+		}
+		else if (m_menuMain.selection == 3) //> exit
+		{
+			this->getManager().closeAll();
+			return false;
+		}
+	}
+	else if (key == sf::Keyboard::Down)
+	{
+		if (m_menuMain.selection < 3)
+		{
+			m_menuMain.selection++;
+			return true;
+		}
+	}
+	else if (key == sf::Keyboard::Up)
+	{
+		if (m_menuMain.selection > 0)
+		{
+			m_menuMain.selection--;
+			return true;
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuMain_onText(sf::Uint32 u)
+{
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void MenuScene::menuRuleset_onInvalidate()
+{
+	m_ss << "          RULESET" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	if (m_menuRuleset.userInputValid)
+		m_ss << std::endl;
+	else
+		m_ss << "   invalid B/S rulestring" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	m_ss << "      " << (m_menuRuleset.selection == 0 ? "> " : "  ") << "enter ruleset";
+	if (m_menuRuleset.isUserInputting)
+	{
+		std::string withCaret(m_menuRuleset.userInput);
+		withCaret.insert(m_menuRuleset.caretPos, 1, '_');
+		m_ss << ": " << withCaret << std::endl;
+	}
+	else
+		m_ss << " (" << m_menuRuleset.rules << ")" << std::endl;
+	m_ss << "      " << (m_menuRuleset.selection == 1 ? "> " : "  ") << "randomize" << std::endl;
+	m_ss << "      " << (m_menuRuleset.selection == 2 ? "> " : "  ") << "back" << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuRuleset_onKeyPress(sf::Keyboard::Key key)
+{
+	switch (key)
+	{
+	case sf::Keyboard::Return:
+		if (m_menuRuleset.selection == 0) // enter ruleset
+		{
+			if (m_menuRuleset.isUserInputting)
 			{
-				if (m_menuRuleset.isUserInputting)
-				{
-					if (m_menuRuleset.userInputValid)
-						m_menuRuleset.rules.set(m_menuRuleset.userInput);
-					m_menuRuleset.userInput = m_menuRuleset.rules;
-					m_menuRuleset.userInputValid = true;
-				}
-				else
-				{
-					m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
-				}
-				m_menuRuleset.isUserInputting = !m_menuRuleset.isUserInputting;
-				return true;
-			}
-			else if (m_menuRuleset.selection == 1) // randomize
-			{
-				m_menuRuleset.rules.setBirth(BOOLRAND() && BOOLRAND(), BOOLRAND() && BOOLRAND(), BOOLRAND(), BOOLRAND(),
-					BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
-				m_menuRuleset.rules.setSurvival(BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(),
-					BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
+				if (m_menuRuleset.userInputValid)
+					m_menuRuleset.rules.set(m_menuRuleset.userInput);
 				m_menuRuleset.userInput = m_menuRuleset.rules;
 				m_menuRuleset.userInputValid = true;
-				return true;
 			}
-			else if (m_menuRuleset.selection == 2) // back
+			else
 			{
-				m_currentMenu = MainMenu;
-				return true;
+				m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
 			}
+			m_menuRuleset.isUserInputting = !m_menuRuleset.isUserInputting;
+			return true;
 		}
-		else if (key == sf::Keyboard::Down && !m_menuRuleset.isUserInputting)
+		else if (m_menuRuleset.selection == 1) // randomize
+		{
+			m_menuRuleset.rules.setBirth(BOOLRAND() && BOOLRAND(), BOOLRAND() && BOOLRAND(), BOOLRAND(), BOOLRAND(),
+				BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
+			m_menuRuleset.rules.setSurvival(BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(),
+				BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND(), BOOLRAND());
+			m_menuRuleset.userInput = m_menuRuleset.rules;
+			m_menuRuleset.userInputValid = true;
+			return true;
+		}
+		else if (m_menuRuleset.selection == 2) // back
+		{
+			m_currentMenu = MainMenu;
+			return true;
+		}
+		break; // case sf::Keyboard::Return
+
+	case sf::Keyboard::Down:
+		if (!m_menuRuleset.isUserInputting)
 		{
 			if (m_menuRuleset.selection < 2)
 			{
@@ -293,7 +329,10 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 				return true;
 			}
 		}
-		else if (key == sf::Keyboard::Up && !m_menuRuleset.isUserInputting)
+		break;
+
+	case sf::Keyboard::Up:
+		if (!m_menuRuleset.isUserInputting)
 		{
 			if (m_menuRuleset.selection > 0)
 			{
@@ -301,7 +340,10 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 				return true;
 			}
 		}
-		else if (key == sf::Keyboard::Backspace && m_menuRuleset.isUserInputting)
+		break;
+
+	case sf::Keyboard::Backspace:
+		if (m_menuRuleset.isUserInputting)
 		{
 			if (!m_menuRuleset.userInput.empty() && m_menuRuleset.caretPos > 0)
 			{
@@ -311,35 +353,145 @@ bool MenuScene::onKeyPress(sf::Keyboard::Key key, bool shift, bool ctrl, bool al
 				return true;
 			}
 		}
-		else if (key == sf::Keyboard::Left && m_menuRuleset.isUserInputting)
+		break;
+
+	case sf::Keyboard::Left:
+		if (m_menuRuleset.isUserInputting)
 		{
 			if (m_menuRuleset.caretPos > 0)
 				m_menuRuleset.caretPos--;
 			return true;
 		}
-		else if (key == sf::Keyboard::Right && m_menuRuleset.isUserInputting)
+
+	case sf::Keyboard::Right:
+		if (m_menuRuleset.isUserInputting)
 		{
 			if (m_menuRuleset.caretPos < m_menuRuleset.userInput.size())
 				m_menuRuleset.caretPos++;
 			return true;
 		}
-		else if (key == sf::Keyboard::Home && m_menuRuleset.isUserInputting)
+
+	case sf::Keyboard::Home:
+		if (m_menuRuleset.isUserInputting)
 		{
 			m_menuRuleset.caretPos = 0;
 			return true;
 		}
-		else if (key == sf::Keyboard::End && m_menuRuleset.isUserInputting)
+		break;
+
+	case sf::Keyboard::End:
+		if (m_menuRuleset.isUserInputting)
 		{
 			m_menuRuleset.caretPos = m_menuRuleset.userInput.size();
 			return true;
 		}
-		else if (key == sf::Keyboard::Escape)
+		break;
+
+	case sf::Keyboard::Escape:
+		m_currentMenu = MainMenu;
+		return true;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuRuleset_onText(sf::Uint32 u)
+{
+	if (!m_menuRuleset.isUserInputting)
+		return false;
+
+	std::string str = sf::String(u).toAnsiString();
+	if (!str.empty())
+	{
+		char c = str[0];
+		if (isdigit(c) || c == '/' || c == 'b' || c == 's')
+		{
+			m_menuRuleset.userInput.insert(m_menuRuleset.caretPos, 1, c);
+			m_menuRuleset.checkValid();
+			m_menuRuleset.caretPos++;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+void MenuScene::menuSettings_onInvalidate()
+{
+	int targetFramerate = m_menuSettings.targetFramerateArr[m_menuSettings.targetFPSIdx];
+
+	m_ss << "          SETTINGS" << std::endl;
+	m_ss << std::endl;
+	m_ss << std::endl;
+	m_ss << "      " << (m_menuSettings.selection == 0 ? "> " : "  ") << "target framerate: ";
+	if (targetFramerate == 0)
+		m_ss << "no limit" << std::endl;
+	else
+		m_ss << targetFramerate << std::endl;
+	m_ss << "      " << (m_menuSettings.selection == 1 ? "> " : "  ") << "exit" << std::endl;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuSettings_onKeyPress(sf::Keyboard::Key key)
+{
+	switch (key)
+	{
+	case sf::Keyboard::Return:
+		if (m_menuSettings.selection == 1) // exit
 		{
 			m_currentMenu = MainMenu;
 			return true;
 		}
 		break;
-	}
 
+	case sf::Keyboard::Down:
+		if (m_menuSettings.selection < 1)
+		{
+			m_menuSettings.selection++;
+			return true;
+		}
+		break;
+
+	case sf::Keyboard::Up:
+		if (m_menuSettings.selection > 0)
+		{
+			m_menuSettings.selection--;
+			return true;
+		}
+		break;
+
+	case sf::Keyboard::Left:
+		if (m_menuSettings.selection == 0)
+		{
+			m_menuSettings.targetFPSIdx = std::max(0, m_menuSettings.targetFPSIdx - 1);
+			int tfr = m_menuSettings.targetFramerateArr[m_menuSettings.targetFPSIdx];
+			this->getManager().setTargetFramerate(static_cast<float>(tfr));
+			UserSettings::instance().setInteger("target_framerate", tfr);
+			return true;
+		}
+		break;
+
+	case sf::Keyboard::Right:
+		if (m_menuSettings.selection == 0)
+		{
+			m_menuSettings.targetFPSIdx = std::min(m_menuSettings.targetFPSMax - 1, m_menuSettings.targetFPSIdx + 1);
+			int tfr = m_menuSettings.targetFramerateArr[m_menuSettings.targetFPSIdx];
+			this->getManager().setTargetFramerate(static_cast<float>(tfr));
+			UserSettings::instance().setInteger("target_framerate", tfr);
+			return true;
+		}
+		break;
+	}
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+bool MenuScene::menuSettings_onText(sf::Uint32 u)
+{
 	return false;
 }

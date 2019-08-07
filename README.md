@@ -7,6 +7,8 @@ Typeface ProggyCleanSZ.ttf provided by [proggyfonts](https://proggyfonts.net/).
 
 ![Preview Image](./preview.png)
 
+[View Changelog](./Changelog.md)
+
 ## Features
 
  - Multithreading support.

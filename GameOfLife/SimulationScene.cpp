@@ -33,6 +33,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -49,8 +50,9 @@ void SimulationScene::init()
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))
 		m_sim.setRuleset(rules);
-
 	rw.setTitle(std::string("GOL - ") + m_sim.getRuleset().getString());
+
+	this->setTargetStepsPerSecond(settings.getFloat("steps_per_second", 60.f));
 
 	std::stringstream ss;
 	ss << "                       WELCOME TO GAME OF LIFE" << std::endl;
@@ -61,11 +63,12 @@ void SimulationScene::init()
 	ss << "                left click : place single cell (hold shift to remove)" << std::endl;
 	ss << "               right click : place many cells (hold shift to remove)" << std::endl;
 	ss << "w/up a/left s/down d/right : move camera " << std::endl;
-	ss << "            equals/keypad+ : zoom in camera" << std::endl;
-	ss << "            hyphen/keypad- : zoom out camera" << std::endl;
-	ss << "             1-9/keypad1-9 : set zoom level" << std::endl;
+	ss << "          equals / keypad+ : zoom in camera" << std::endl;
+	ss << "          hyphen / keypad- : zoom out camera" << std::endl;
+	ss << "           1-9 / keypad1-9 : set zoom level" << std::endl;
 	ss << "                    period : step once (while paused)" << std::endl;
 	ss << "                  spacebar : pause/resume simulation" << std::endl;
+	ss << "                     [ / ] : change step rate (hold shift x10)" << std::endl;
 	ss << "                         r : reset simulation" << std::endl;
 	ss << "                    escape : exit simulation" << std::endl;
 	ss << "                         t : toggle multithreading" << std::endl;
@@ -98,9 +101,13 @@ void SimulationScene::init()
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::finish()
 {
+	m_sim.reset();
+
 	auto& rw = this->getManager().getWindow();
 	rw.setTitle("GOL");
-	m_sim.reset();
+
+	auto& settings = UserSettings::instance();
+	settings.setFloat("steps_per_second", this->getTargetStepsPerSecond());
 }
 
 
@@ -236,6 +243,14 @@ void SimulationScene::processEvent(const sf::Event & ev)
 		case sf::Keyboard::Numpad9:
 			cameraSetZoom(1.f / 9);
 			break;
+		case sf::Keyboard::LBracket:
+			this->setTargetStepsPerSecond(this->getTargetStepsPerSecond() - (m_controls.shift ? 10.f : 1.f));
+			std::cout << "step rate: " << this->getTargetStepsPerSecond() << std::endl;
+			break;
+		case sf::Keyboard::RBracket:
+			this->setTargetStepsPerSecond(this->getTargetStepsPerSecond() + (m_controls.shift ? 10.f : 1.f));
+			std::cout << "step rate: " << this->getTargetStepsPerSecond() << std::endl;
+			break;
 		}
 		break;
 
@@ -279,7 +294,7 @@ void SimulationScene::processEvent(const sf::Event & ev)
 
 
 //////////////////////////////////////////////////////////////////////
-int SimulationScene::pre_update()
+int SimulationScene::preUpdate()
 {
 	float curTime   = this->getManager().getElapsedTime().asSeconds();
 	float dt        = curTime - m_lastPreUpdate;
@@ -330,7 +345,7 @@ int SimulationScene::pre_update()
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::update()
 {
-	int stepsFinished, steps = pre_update();
+	int stepsFinished, steps = preUpdate();
 	float curTime = this->getManager().getElapsedTime().asSeconds();
 	for (stepsFinished = 0; stepsFinished < steps; stepsFinished++)
 	{

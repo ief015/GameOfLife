@@ -60,7 +60,7 @@ public:
 
 	// Set the target simulation steps/second.
 	// Setting to 0 disables update limiting and will step once per frame.
-	inline float setTargetStepsPerSecond(float updateRate) { m_targetStepsPerSecond = updateRate; }
+	inline void setTargetStepsPerSecond(float updateRate) { m_targetStepsPerSecond = std::max(0.f, updateRate); }
 
 protected:
 	virtual void init()   override;
@@ -72,14 +72,17 @@ protected:
 private:
 	gol::Simulation    m_sim;
 	SimulationRenderer m_renderer;
+
 	sf::View m_camera;
 	float    m_cameraZoom;
 	float    m_cameraMoveSpeed;
-	bool     m_paused;
-	bool     m_stepOnce;
-	int      m_debugMode;
-	float    m_debugStepsPerSecond;
-	float    m_targetStepsPerSecond;
+
+	bool m_paused;
+	bool m_stepOnce;
+
+	int   m_debugMode;
+	float m_debugStepsPerSecond;
+	float m_targetStepsPerSecond;
 
 	sf::Text m_txtIntro;
 	bool     m_hideIntro;
@@ -100,7 +103,7 @@ private:
 	
 	float m_lastPreUpdate;
 	float m_stepAccumulator;
-	int pre_update();
+	int preUpdate();
 	void toggleDebug(int mode);
 	void placeCells(int x, int y, int size, bool alive);
 	void screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y);

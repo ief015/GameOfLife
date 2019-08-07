@@ -72,12 +72,16 @@ private:
 	enum {
 		MainMenu,
 		ChangeRuleset,
+		Settings
 	} m_currentMenu;
 
 	// Information for main menu.
 	struct {
 		int selection = 0;
 	} m_menuMain;
+	void menuMain_onInvalidate();
+	bool menuMain_onKeyPress(sf::Keyboard::Key);
+	bool menuMain_onText(sf::Uint32);
 
 	// Information for change ruleset menu.
 	struct {
@@ -87,9 +91,23 @@ private:
 		bool isUserInputting = false;
 		bool userInputValid = true;
 		size_t caretPos = 0;
+
 		void checkValid() {
 			gol::Ruleset rules;
 			userInputValid = rules.set(userInput);
 		}
 	} m_menuRuleset;
+	void menuRuleset_onInvalidate();
+	bool menuRuleset_onKeyPress(sf::Keyboard::Key);
+	bool menuRuleset_onText(sf::Uint32);
+
+	struct {
+		int selection = 0;
+		int targetFPSIdx = 3;
+		const int targetFPSMax = 8;
+		const int targetFramerateArr[8] = { 0, 24, 30, 60, 120, 144, 240, 300 };
+	} m_menuSettings;
+	void menuSettings_onInvalidate();
+	bool menuSettings_onKeyPress(sf::Keyboard::Key);
+	bool menuSettings_onText(sf::Uint32);
 };
