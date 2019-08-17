@@ -1,6 +1,6 @@
 # Game Of Life
 
-A personal experiment to implement "Conway's Game of Life" in a multithreaded environment.
+A personal experiment to optimally implement "Conway's Game of Life" in an unlimited, multithreaded environment.
 
 The only dependency is [SFML 2.5.x](https://www.sfml-dev.org/) for window and graphics handling.
 Typeface ProggyCleanSZ.ttf provided by [proggyfonts](https://proggyfonts.net/).
@@ -13,6 +13,7 @@ Typeface ProggyCleanSZ.ttf provided by [proggyfonts](https://proggyfonts.net/).
 
  - Multithreading support.
  - Unbounded universe simulation.
+ - Custom rulestrings.
  - Minimal approach.
 
 ## Limitations

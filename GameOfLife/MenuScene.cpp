@@ -245,6 +245,7 @@ bool MenuScene::menuMain_onKeyPress(sf::Keyboard::Key key)
 			return true;
 		}
 	}
+	return false;
 }
 
 

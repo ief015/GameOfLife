@@ -323,10 +323,17 @@ Chunk* Simulation::createChunk(int col, int row)
 //////////////////////////////////////////////////////////////////////
 Chunk* Simulation::getChunkAt(int x, int y, bool autoCreate)
 {
-	// TODO: bug, inaccurately placing cells in negative coordinates
 	int col, row;
-	col = x / static_cast<int>(Chunk::CHUNK_SIZE);
-	row = y / static_cast<int>(Chunk::CHUNK_SIZE);
+
+	if (x < 0)
+		col = (x + 1) / static_cast<int>(Chunk::CHUNK_SIZE) - 1;
+	else
+		col = x / static_cast<int>(Chunk::CHUNK_SIZE);
+
+	if (y < 0)
+		row = (y + 1) / static_cast<int>(Chunk::CHUNK_SIZE) - 1;
+	else
+		row = y / static_cast<int>(Chunk::CHUNK_SIZE);
 
 	// Auto-create it if requested
 	if (autoCreate)
@@ -351,8 +358,16 @@ Chunk* Simulation::getChunkAt(int x, int y, bool autoCreate)
 const Chunk* Simulation::getChunkAt(int x, int y) const
 {
 	int col, row;
-	col = x / static_cast<int>(Chunk::CHUNK_SIZE);
-	row = y / static_cast<int>(Chunk::CHUNK_SIZE);
+
+	if (x < 0)
+		col = (x + 1) / static_cast<int>(Chunk::CHUNK_SIZE) - 1;
+	else
+		col = x / static_cast<int>(Chunk::CHUNK_SIZE);
+
+	if (y < 0)
+		row = (y + 1) / static_cast<int>(Chunk::CHUNK_SIZE) - 1;
+	else
+		row = y / static_cast<int>(Chunk::CHUNK_SIZE);
 
 	auto itMapCol = m_chunks.find(col);
 	if (itMapCol != m_chunks.end())

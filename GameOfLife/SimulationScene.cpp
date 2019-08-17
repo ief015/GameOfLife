@@ -146,6 +146,8 @@ void SimulationScene::processEvent(const sf::Event & ev)
 		break;
 
 	case sf::Event::MouseMoved:
+		m_controls.mouseX = ev.mouseMove.x;
+		m_controls.mouseY = ev.mouseMove.y;
 		if (m_controls.mouseLeft)
 		{
 			int x, y;
@@ -300,7 +302,9 @@ int SimulationScene::preUpdate()
 	float dt        = curTime - m_lastPreUpdate;
 	m_lastPreUpdate = curTime;
 	
-	bool isMovingCam = m_controls.moveLeft || m_controls.moveRight || m_controls.moveUp || m_controls.moveDown;
+	bool isMovingCam = m_controls.moveLeft || m_controls.moveRight ||
+	                   m_controls.moveUp || m_controls.moveDown;
+
 	if (isMovingCam)
 		m_cameraMoveSpeed = std::min(m_cameraMoveSpeed + (10.f * dt), 10.f);
 	else
@@ -318,6 +322,8 @@ int SimulationScene::preUpdate()
 		cameraSetZoom(std::max(0.1f, m_cameraZoom *= 1.f - dt));
 	if (m_controls.zoomOut)
 		cameraSetZoom(std::min(10.f, m_cameraZoom *= 1.f + dt));
+
+	this->screenToWorld(m_controls.mouseX, m_controls.mouseY, m_controls.cursorX, m_controls.cursorY);
 
 	if (m_stepOnce)
 	{
@@ -352,7 +358,7 @@ void SimulationScene::update()
 		m_sim.step();
 
 		// Break when we've been stepping for too long
-		if (this->getManager().getElapsedTime().asSeconds() - curTime > 1.f)
+		if (this->getManager().getElapsedTime().asSeconds() - curTime > 0.01f)
 			break;
 	}
 
@@ -421,7 +427,8 @@ void SimulationScene::render()
 		         << "\ndeaths      : " << m_sim.getDeaths()
 		         << "\npop delta   : " << (static_cast<long long>(m_sim.getBirths()) - m_sim.getDeaths())
 		         << "\ngeneration  : " << m_sim.getGeneration()
-		         << "\nruleset     : " << m_sim.getRuleset().getString();
+		         << "\nruleset     : " << m_sim.getRuleset().getString()
+		         << "\ncursor      : " << m_controls.cursorX << ",\t" << m_controls.cursorY;
 		m_txtDebug.setString(strDebug.str());
 	}
 }
@@ -483,8 +490,8 @@ void SimulationScene::screenToWorld(int scr_x, int scr_y, int& out_x, int& out_y
 {
 	auto& rw = this->getManager().getWindow();
 	sf::Vector2f v = rw.mapPixelToCoords(sf::Vector2i(scr_x, scr_y), m_camera);
-	out_x = static_cast<int>(v.x);
-	out_y = static_cast<int>(v.y);
+	out_x = static_cast<int>(std::floor(v.x));
+	out_y = static_cast<int>(std::floor(v.y));
 }
 
 

@@ -101,6 +101,7 @@ private:
 	bool menuRuleset_onKeyPress(sf::Keyboard::Key);
 	bool menuRuleset_onText(sf::Uint32);
 
+	// Information for settings menu.
 	struct {
 		int selection = 0;
 		int targetFPSIdx = 3;

@@ -13,11 +13,9 @@
 - Update/render timings in debug mode are now more accurate.
 - Separated simulation steps/second from framerate. (Ability to run more than one step per frame)
 - Sleeping now more accurately accounts for delta time. (Resulting in much less frame skips)
+- Placing cells with negative coordinates now behaves correctly.
 - Debug "fps" now "frames/sec".
 - Included "steps/sec" in debug
-
-**Known Bugs**
-- Placing cells with negative coordinates still misbehaving.
 
 ### 0.1.0 (Aug 01 2019)
 - Initial release!

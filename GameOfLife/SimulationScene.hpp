@@ -92,6 +92,10 @@ private:
 	struct {
 		bool mouseLeft  = false;
 		bool mouseRight = false;
+		int  mouseX     = 0;
+		int  mouseY     = 0;
+		int  cursorX    = 0;
+		int  cursorY    = 0;
 		bool shift      = false;
 		bool moveUp     = false;
 		bool moveDown   = false;
