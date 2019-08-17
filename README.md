@@ -1,12 +1,14 @@
 # Game Of Life
-Download (Windows x86): **[GameOfLife-latest.zip](./GameOfLife-latest.zip)**
-
 
 A personal experiment to optimally implement "Conway's Game of Life" in an unlimited, multithreaded environment.
 
 The only dependency is [SFML 2.5.x](https://www.sfml-dev.org/) for window and graphics handling.
 Typeface ProggyCleanSZ.ttf provided by [proggyfonts](https://proggyfonts.net/).
 
+
+## Download
+
+For Windows (x86): **[GameOfLife-latest.zip](./GameOfLife-latest.zip)**
 
 ![Preview Image](./preview.png)
 
