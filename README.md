@@ -8,7 +8,7 @@ Typeface ProggyCleanSZ.ttf provided by [proggyfonts](https://proggyfonts.net/).
 
 ## Download
 
-For Windows (x86): **[GameOfLife-latest.zip](./raw/master/GameOfLife-latest.zip)**
+For Windows (x86): **[GameOfLife-latest.zip](https://github.com/ief015/GameOfLife/raw/master/GameOfLife-latest.zip)**
 
 ![Preview Image](./preview.png)
 
