@@ -1,7 +1,17 @@
 # Changelog
-**Current version: 0.2.1**
+**Current version: 0.3.0**
 
-### 0.2.1 (Aug 06 2019)
+
+### 0.3.0 (Aug 17 2019)
+**New Features**
+- Added grid while zoomed in (togglable with G key, grid shows at x4+ zoom)
+
+**Fixes/Changes**
+- Increased zoom-in limit (x10 -> x100)
+- Camera movement now properly accounts for delta-time (panning/zooming was too quick on very high framerates)
+
+
+### 0.2.1 (Aug 17 2019)
 **Fixes/Changes**
 - Placing cells with negative coordinates now behaves correctly.
 - Included "cursor" (mouse x/y world coords) in debug.
@@ -22,6 +32,7 @@
 - Sleeping now more accurately accounts for delta time. (Resulting in much less frame skips)
 - Debug "fps" now "frames/sec".
 - Included "steps/sec" in debug.
+
 
 ### 0.1.0 (Aug 01 2019)
 - Initial release!

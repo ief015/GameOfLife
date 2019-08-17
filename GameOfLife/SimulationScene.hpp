@@ -43,6 +43,7 @@ public:
 		, m_paused(true)
 		, m_stepOnce(false)
 		, m_hideIntro(false)
+		, m_showGrid(true)
 		, m_debugMode(0)
 		, m_cameraZoom(1.f)
 		, m_cameraMoveSpeed(1.f)
@@ -76,6 +77,9 @@ private:
 	sf::View m_camera;
 	float    m_cameraZoom;
 	float    m_cameraMoveSpeed;
+
+	bool m_showGrid;
+	sf::RectangleShape m_gridLine;
 
 	bool m_paused;
 	bool m_stepOnce;

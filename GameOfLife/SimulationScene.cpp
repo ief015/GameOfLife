@@ -66,6 +66,7 @@ void SimulationScene::init()
 	ss << "          equals / keypad+ : zoom in camera" << std::endl;
 	ss << "          hyphen / keypad- : zoom out camera" << std::endl;
 	ss << "           1-9 / keypad1-9 : set zoom level" << std::endl;
+	ss << "                         g : toggle grid (when zoomed in)" << std::endl;
 	ss << "                    period : step once (while paused)" << std::endl;
 	ss << "                  spacebar : pause/resume simulation" << std::endl;
 	ss << "                     [ / ] : change step rate (hold shift x10)" << std::endl;
@@ -89,7 +90,7 @@ void SimulationScene::init()
 	m_txtDebug.setOutlineThickness(1.5f);
 	m_txtDebug.setPosition(2.f, 0.f);
 
-	m_txtPaused = sf::Text("PAUSED (press spacebar to resume)", SceneManager::getDefaultFont(), 16);
+	m_txtPaused = sf::Text("PAUSED (press spacebar to resume, period to step)", SceneManager::getDefaultFont(), 16);
 	m_txtPaused.setFillColor(sf::Color(255, 255, 255, 255));
 	m_txtPaused.setOutlineColor(sf::Color(0, 0, 0, 255));
 	m_txtPaused.setOutlineThickness(1.5f);
@@ -184,6 +185,9 @@ void SimulationScene::processEvent(const sf::Event & ev)
 			break;
 		case sf::Keyboard::Period:
 			if (m_paused) m_stepOnce = true;
+			break;
+		case sf::Keyboard::G:
+			m_showGrid = !m_showGrid;
 			break;
 		case sf::Keyboard::A:
 		case sf::Keyboard::Left:
@@ -306,20 +310,20 @@ int SimulationScene::preUpdate()
 	                   m_controls.moveUp || m_controls.moveDown;
 
 	if (isMovingCam)
-		m_cameraMoveSpeed = std::min(m_cameraMoveSpeed + (10.f * dt), 10.f);
+		m_cameraMoveSpeed = std::min(m_cameraMoveSpeed + (1000.f * dt), 1000.f);
 	else
-		m_cameraMoveSpeed = std::max(m_cameraMoveSpeed - (5.f * dt), 1.f);
+		m_cameraMoveSpeed = std::max(m_cameraMoveSpeed - (500.f * dt), 100.f);
 
 	if (m_controls.moveLeft)
-		m_camera.move(-m_cameraMoveSpeed * m_cameraZoom, 0.f);
+		m_camera.move(-m_cameraMoveSpeed * m_cameraZoom * dt, 0.f);
 	if (m_controls.moveRight)
-		m_camera.move(m_cameraMoveSpeed * m_cameraZoom, 0.f);
+		m_camera.move(m_cameraMoveSpeed * m_cameraZoom * dt, 0.f);
 	if (m_controls.moveUp)
-		m_camera.move(0.f, -m_cameraMoveSpeed * m_cameraZoom);
+		m_camera.move(0.f, -m_cameraMoveSpeed * m_cameraZoom * dt);
 	if (m_controls.moveDown)
-		m_camera.move(0.f, m_cameraMoveSpeed * m_cameraZoom);
+		m_camera.move(0.f, m_cameraMoveSpeed * m_cameraZoom * dt);
 	if (m_controls.zoomIn)
-		cameraSetZoom(std::max(0.1f, m_cameraZoom *= 1.f - dt));
+		cameraSetZoom(std::max(0.01f, m_cameraZoom *= 1.f - dt));
 	if (m_controls.zoomOut)
 		cameraSetZoom(std::min(10.f, m_cameraZoom *= 1.f + dt));
 
@@ -376,6 +380,9 @@ void SimulationScene::update()
 void SimulationScene::render()
 {
 	auto& rw = this->getManager().getWindow();
+	sf::Vector2u screen = rw.getSize();
+
+	// Apply camera view
 	rw.setView(m_camera);
 
 	m_renderer.cullZone.width  = m_camera.getSize().x;
@@ -383,8 +390,38 @@ void SimulationScene::render()
 	m_renderer.cullZone.left   = m_camera.getCenter().x - m_renderer.cullZone.width / 2;
 	m_renderer.cullZone.top    = m_camera.getCenter().y - m_renderer.cullZone.height / 2;
 	m_renderer.render();
+	
+	if (m_showGrid && m_cameraZoom <= (1 / 4.f))
+	{
+		int pos;
+		int left   = static_cast<int>(std::floor(m_renderer.cullZone.left));
+		int top    = static_cast<int>(std::floor(m_renderer.cullZone.top));
+		int right  = static_cast<int>(std::ceil(m_renderer.cullZone.left + m_renderer.cullZone.width));
+		int bottom = static_cast<int>(std::ceil(m_renderer.cullZone.top + m_renderer.cullZone.height));
+		
+		m_gridLine.setScale(m_cameraZoom, m_cameraZoom);
+		m_gridLine.setFillColor(sf::Color(0x7F7F7F7Fu));
 
-	sf::Vector2u screen = rw.getSize();
+		// left->right vertical lines
+		m_gridLine.setSize(sf::Vector2f(1.f, static_cast<float>(screen.y)));
+		for (pos = left; pos <= right; pos++)
+		{
+			m_gridLine.setPosition(static_cast<float>(pos), m_renderer.cullZone.top);
+			m_gridLine.setFillColor(sf::Color((pos % 10 == 0) ? 0x7F7F7F7Fu : 0x7F7F7F3Fu));
+			rw.draw(m_gridLine);
+		}
+
+		// top->bottom horizontal lines
+		m_gridLine.setSize(sf::Vector2f(static_cast<float>(screen.x), 1.f));
+		for (pos = top; pos <= bottom; pos++)
+		{
+			m_gridLine.setPosition(m_renderer.cullZone.left, static_cast<float>(pos));
+			m_gridLine.setFillColor(sf::Color((pos % 10 == 0) ? 0x7F7F7F7Fu : 0x7F7F7F3Fu));
+			rw.draw(m_gridLine);
+		}
+	}
+
+	// Reset camera view
 	rw.setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(screen.x), static_cast<float>(screen.y))));
 
 	if (!m_hideIntro)
