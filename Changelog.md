@@ -1,5 +1,11 @@
 # Changelog
-**Current version: 0.3.0**
+**Current version: 0.3.1**
+
+
+### 0.3.1 (Aug 17 2019)
+**Fixes/Changes**
+- Changed initial zoom level (x1 -> x8)
+- Outline given to intro/controls text
 
 
 ### 0.3.0 (Aug 17 2019)

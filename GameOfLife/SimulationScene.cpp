@@ -46,6 +46,7 @@ void SimulationScene::init()
 
 	m_camera        = rw.getView();
 	m_lastPreUpdate = this->getManager().getElapsedTime().asSeconds();
+	this->cameraSetZoom(1/8.f);
 
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))
@@ -81,6 +82,8 @@ void SimulationScene::init()
 	sf::FloatRect bounds;
 	m_txtIntro = sf::Text(ss.str(), SceneManager::getDefaultFont(), 16);
 	m_txtIntro.setFillColor(sf::Color(255, 255, 255, 255));
+	m_txtIntro.setOutlineColor(sf::Color(0, 0, 0, 255));
+	m_txtIntro.setOutlineThickness(1.5f);
 	bounds = m_txtIntro.getLocalBounds();
 	m_txtIntro.setOrigin(floor(bounds.width / 2.f), floor(bounds.height / 2.f));
 
