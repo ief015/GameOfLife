@@ -36,6 +36,10 @@
 #include <iostream>
 
 
+const float CAMERA_ZOOM_INIT = 1 / 8.f;
+const float CAMERA_ZOOM_SHOW_GRID = 1 / 4.f;
+
+
 //////////////////////////////////////////////////////////////////////
 void SimulationScene::init()
 {
@@ -46,7 +50,7 @@ void SimulationScene::init()
 
 	m_camera        = rw.getView();
 	m_lastPreUpdate = this->getManager().getElapsedTime().asSeconds();
-	this->cameraSetZoom(1/8.f);
+	this->cameraSetZoom(CAMERA_ZOOM_INIT);
 
 	gol::Ruleset rules;
 	if (rules.set(settings.getString("ruleset")))
@@ -394,7 +398,7 @@ void SimulationScene::render()
 	m_renderer.cullZone.top    = m_camera.getCenter().y - m_renderer.cullZone.height / 2;
 	m_renderer.render();
 	
-	if (m_showGrid && m_cameraZoom <= (1 / 4.f))
+	if (m_showGrid && m_cameraZoom <= CAMERA_ZOOM_SHOW_GRID)
 	{
 		int pos;
 		int left   = static_cast<int>(std::floor(m_renderer.cullZone.left));
@@ -402,15 +406,18 @@ void SimulationScene::render()
 		int right  = static_cast<int>(std::ceil(m_renderer.cullZone.left + m_renderer.cullZone.width));
 		int bottom = static_cast<int>(std::ceil(m_renderer.cullZone.top + m_renderer.cullZone.height));
 		
+		float alpha = std::min(1.f, (1.f - m_cameraZoom / CAMERA_ZOOM_SHOW_GRID) * 2.f);
+		const sf::Color LINE_COLOR1 = sf::Color(0x7F, 0x7F, 0x7F, static_cast<sf::Uint8>(alpha * 0x7Fu));
+		const sf::Color LINE_COLOR2 = sf::Color(0x3F, 0x3F, 0x3F, static_cast<sf::Uint8>(alpha * 0x7Fu));
+
 		m_gridLine.setScale(m_cameraZoom, m_cameraZoom);
-		m_gridLine.setFillColor(sf::Color(0x7F7F7F7Fu));
 
 		// left->right vertical lines
 		m_gridLine.setSize(sf::Vector2f(1.f, static_cast<float>(screen.y)));
 		for (pos = left; pos <= right; pos++)
 		{
 			m_gridLine.setPosition(static_cast<float>(pos), m_renderer.cullZone.top);
-			m_gridLine.setFillColor(sf::Color((pos % 10 == 0) ? 0x7F7F7F7Fu : 0x7F7F7F3Fu));
+			m_gridLine.setFillColor((pos % 10 == 0) ? LINE_COLOR1 : LINE_COLOR2);
 			rw.draw(m_gridLine);
 		}
 
@@ -419,7 +426,7 @@ void SimulationScene::render()
 		for (pos = top; pos <= bottom; pos++)
 		{
 			m_gridLine.setPosition(m_renderer.cullZone.left, static_cast<float>(pos));
-			m_gridLine.setFillColor(sf::Color((pos % 10 == 0) ? 0x7F7F7F7Fu : 0x7F7F7F3Fu));
+			m_gridLine.setFillColor((pos % 10 == 0) ? LINE_COLOR1 : LINE_COLOR2);
 			rw.draw(m_gridLine);
 		}
 	}
@@ -468,7 +475,8 @@ void SimulationScene::render()
 		         << "\npop delta   : " << (static_cast<long long>(m_sim.getBirths()) - m_sim.getDeaths())
 		         << "\ngeneration  : " << m_sim.getGeneration()
 		         << "\nruleset     : " << m_sim.getRuleset().getString()
-		         << "\ncursor      : " << m_controls.cursorX << ",\t" << m_controls.cursorY;
+		         << "\ncursor      : " << m_controls.cursorX << ",\t" << m_controls.cursorY
+		         << "\nzoom        : " << m_cameraZoom;
 		m_txtDebug.setString(strDebug.str());
 	}
 }

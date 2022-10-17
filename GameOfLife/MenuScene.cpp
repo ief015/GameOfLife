@@ -47,7 +47,7 @@ void MenuScene::init()
 	m_txt = sf::Text("", SceneManager::getDefaultFont(), 16);
 	m_txt.setFillColor(sf::Color::White);
 
-	m_txtVersion = sf::Text("ver " VERSION_STRING, SceneManager::getDefaultFont(), 16);
+	m_txtVersion = sf::Text("v" VERSION_STRING, SceneManager::getDefaultFont(), 16);
 	m_txtVersion.setOrigin(-2.f, m_txtVersion.getCharacterSize() + 2.f);
 	m_txtVersion.setFillColor(sf::Color::White);
 
