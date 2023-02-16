@@ -55,4 +55,7 @@ namespace gol
 // Set cell's alive state for next generation.
 #define GOL_SET_CELL_ALIVE_NEXTGEN(c,bAlive) ((c) = ((bAlive) ? ((c) | GOL_FLAG_ALIVE_NEXTGEN) : ((c) & ~GOL_FLAG_ALIVE_NEXTGEN)))
 
+// Step cell's alive state to the next generation.
+#define GOL_STEP_CELL(c) ((c) = (((c) >> 1) | ((c) & GOL_FLAG_ALIVE_NEXTGEN)))
+
 }

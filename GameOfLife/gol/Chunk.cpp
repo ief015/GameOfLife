@@ -237,9 +237,7 @@ void Chunk::applyCellStates()
 			for (int x = 0; x < CHUNK_SIZE; x++, idx++)
 			{
 				char& cell = m_cells[idx];
-				bool alive = GOL_IS_CELL_ALIVE_NEXTGEN(cell);
-				GOL_SET_CELL_ALIVE(cell, alive);
-				if (alive)
+				if (GOL_STEP_CELL(cell))
 					m_cellCoords.emplace_back(x, y);
 			}
 		}
